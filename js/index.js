@@ -18,6 +18,7 @@ var jumpButton;
 var bg;
 
 function create() {
+
     game.physics.startSystem(Phaser.Physics.ARCADE);
     game.world.setBounds(0, 0, 1000, 600);
     // Define background
@@ -51,6 +52,31 @@ function create() {
 
     cursors = game.input.keyboard.createCursorKeys();
     jumpButton = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+
+    var ratData = [
+        '.D...........',
+        '18...........',
+        '1D...........',
+        '18.....1111..',
+        '1D..111DDEE1.',
+        '1811EEE18E0E1',
+        '.1DEEEEEEEEED',
+        '..1EEEEEE41..',
+        '.11E41E1411..',
+        '1111E1E1E111.',
+        '.1111111111..'
+    ];
+
+    game.create.texture('ratTexture', ratData, 4, 4, 4);
+
+    rats = game.add.physicsGroup();
+
+    for (var i = 0; i < 9; i++)
+    {
+        var rat = rats.create(game.world.randomX, y, 'ratTexture');
+        rat.body.velocity.x = game.rnd.between(100, 300);
+    }
+
 
 }
 
