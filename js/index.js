@@ -35,7 +35,7 @@ function create() {
 
     player.body.collideWorldBounds = true;
     player.body.gravity.y = 1000;
-    player.body.maxVelocity.y = 500;
+    player.body.maxVelocity.y = 1000;
     player.body.setSize(20, 32, 5, 16);
 
     // Define obstacle
@@ -50,39 +50,37 @@ function create() {
 
 function update() {
     player.body.velocity.x = 0;
-    game.physics.arcade.collide(player, obstacle, collisionHandler, null, this);
+    game.physics.arcade.collide(player, obstacles[0].obstacle, collisionHandler, null, this);
 
     if (jumpButton.isDown && player.body.onFloor() && game.time.now > jumpTimer)
     {
         player.frame = 6
-        player.body.velocity.y = -500;
+        player.body.velocity.y = -750;
         jumpTimer = game.time.now + 750;
-        renderObstacle();
     }
     if (player.body.onFloor() && game.time.now > runTimer) 
     {
         runTimer = game.time.now + 250
         player.frame = (player.frame % 4 + 5)
     }
-    if (obstacle.x == 0) {
+    if (obstacles[0].obstacle.x < 25) {
+        // renderObstacle();
+        obstacles[0].obstacle.pendingDestroy = true;
+        obstacles.pop(0);
         renderObstacle();
     }
-    if (abs(obstacles[0].x - player.body.x) < 5) 
-    {
-    	continue;
-    }
-    console.log(obstacle.x)
-
 }
 function collisionHandler (obj1, obj2) {
 
     game.stage.backgroundColor = '#992d2d';
     console.log('BOOM')
+    game.destroy();
 
 }
 
 function renderObstacle () {
-	obstacles.append(obstacle(curId));
+	obstacles.push(new obstacle(curId));
+    curId++;
 }
 
 class obstacle {
@@ -91,11 +89,11 @@ class obstacle {
 		this.obstacle = game.add.sprite(900, 600, 'mushroom');
     	this.obstacle.name = 'mushroom';
    
-    	game.physics.enable(obstacle, Phaser.Physics.ARCADE);
+    	game.physics.enable(this.obstacle, Phaser.Physics.ARCADE);
     
-    	this.obstacle.body.velocity.x = -100
+    	this.obstacle.body.velocity.x = -Math.random()*100 - 100
     	this.obstacle.body.collideWorldBounds = true;
-    	curId++;
+        this.obstacle.immovable = true;
 	}
 }
 
