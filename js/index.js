@@ -90,7 +90,7 @@ function collisionHandler (obj1, obj2) {
     player.pendingDestroy = true;
 }
 
-function renderObstacle () {
+function renderObstacle() {
     curId++;
 	obstacles.push(new obstacle(curId));
 }
