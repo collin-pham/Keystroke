@@ -6,7 +6,7 @@ function preload() {
     game.load.spritesheet('dude', 'assets/dude.png', 32, 48);
     game.load.image('background', 'assets/background.png');
     game.load.spritesheet('mushroom', 'assets/mushroom.png');
-    game.load.spritesheet('fireball', 'assets/fireball.png', 32, 48);
+    game.load.spritesheet('fireball', 'assets/fireball.png', 48, 48);
 }
 // define initial parameters
 var player;
@@ -15,23 +15,24 @@ var jumpTimer = 0;
 var runTimer = 0;
 var cursors;
 var space;
-var bg;
+var bg;                         // background variable
 
 var obstacles = [];
 var currentObstacles = []
 
 var curId = -1;
+
 //string of all keys pressed, dont touch or rename collin!!
 var keystring = "";
 
 function create() {
+    // Define the world
     game.physics.startSystem(Phaser.Physics.ARCADE);
     game.world.setBounds(0, 0, 1000, 600);
+    game.physics.arcade.gravity.y = 300;
+
     // Define background
     bg = game.add.tileSprite(0, 0, 800, 600, 'background');
-
-    // define the y gravity
-    game.physics.arcade.gravity.y = 300;
 
     // Define player
     player = game.add.sprite(150, 320, 'dude');
@@ -54,6 +55,8 @@ function create() {
 }
 
 function update() {
+    bg.tilePosition.x -= .5;
+
     player.body.velocity.x = 0;
     game.physics.arcade.collide(player, currentObstacles[curId].obstacle, collisionHandler, null, this);
 
@@ -125,16 +128,39 @@ function collisionHandler (obj1, obj2) {
     renderObstacle();
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Obstacle Code
+/*****************************************************************
+Obstacle Code
+
+******************************************************************/
 
 function initObstacles() {
-    obstacles = [
-        'mushroom',
-        'fireball'
-    ]
-}
+    const mushroom = {
+        action: 'jump',
+        baseVelocity: 100,
+        frame: 0,
+        height: 50,
+        maxVelocity: 1000,
+        name: 'mushroom',
+        width: 50,
+        onGround: true
+    }
+    const fireball = {
+        action: 'jump',
+        baseVelocity: 100,
+        frame: 0,
+        height: 100,
+        maxVelocity: 1000,
+        name: 'fireball',
+        width: 100,
+        onGround: true
+    }
 
+    obstacles = [
+        mushroom, 
+        fireball
+    ]
+    
+}
 
 // render new obstacle objects based on random Id.
 function renderObstacle() {
@@ -143,29 +169,49 @@ function renderObstacle() {
     console.log('renderObstacles')
 }
 
-
-
 class obstacle {
 	constructor(id) {
-        console.log(id)
+        var obstacle = obstacles[id];
 		this.id = id;
-        console.log(obstacles[id])
-		this.obstacle = game.add.sprite(900, 600, obstacles[id]);
-        this.obstacle.frame = 0;
-        this.obstacle.width = 50;
-        this.obstacle.height = 50;
-    	this.obstacle.name = obstacles[id];
+
+		this.obstacle = game.add.sprite(900, 600, obstacles[id].name);
+        this.obstacle.frame = obstacle.frame;
+        this.obstacle.width = obstacle.width;
+        this.obstacle.height = obstacle.height;
+    	this.obstacle.name = obstacle.name;
    
     	game.physics.enable(this.obstacle, Phaser.Physics.ARCADE);
-    
-    	this.obstacle.body.velocity.x = -50;
+        
+    	this.obstacle.body.velocity.x = -1 * obstacle.baseVelocity
     	this.obstacle.body.collideWorldBounds = true;
         this.obstacle.immovable = true;
 	}
 }
 
-function render () {
+/*****************************************************************
+Difficulty Code
 
+******************************************************************/
+
+function changeObstacleVelocity(obstacle) {
+
+}
+
+function changeBackgroundVelocity() {
+
+}
+
+function changePlatformVelocity() {
+
+}
+
+function changeJumpString() {
+
+}
+
+
+
+function render () {
     // game.debug.text(game.time.physicsElapsed, 32, 32);
     // game.debug.body(player);
     game.debug.bodyInfo(player, 16, 24);
