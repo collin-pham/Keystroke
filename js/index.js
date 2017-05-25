@@ -15,14 +15,14 @@ var jumpTimer = 0;
 var runTimer = 0;
 var cursors;
 
-var space;
+//for movement aside from keyboard input
 var leftKey;
 var rightKey;
 
 var bg;                         // background variable
 
+//stores the command that corresponds to jump at any given time
 var pressString = "JUMP";
-
 
 var obstacles = [];
 var currentObstacles = []
@@ -31,6 +31,8 @@ var curId = -1;
 
 //string of all keys pressed, dont touch or rename collin!!
 var keystring = "";
+
+/////////////////////////// RIGHT NOW THE PLAYER CAN GO FURTHER RIGHT THAN WHERE OBSTACLES SPAWN. FIX AT SOME POINT BY LIMITING PLAYER /////////
 
 function create() {
     // Define the world
@@ -58,45 +60,48 @@ function create() {
 
     cursors = game.input.keyboard.createCursorKeys();
 
-    space = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+    //initialize arrow keys
     leftKey = game.input.keyboard.addKey(Phaser.Keyboard.LEFT);
     rightKey = game.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
 
+    //create handler for rest of keyboard
     game.input.keyboard.onDownCallback =  function(e) {key(e.keyCode)};
 }
 
 function update() {
     bg.tilePosition.x -= .5;
 
+    //so player doesn't slide around
     player.body.velocity.x = 0;
+
+    //physics handler for collisions
     game.physics.arcade.collide(player, currentObstacles[curId].obstacle, collisionHandler, null, this);
 
-    if (checkstring(pressString) && player.body.onFloor() && game.time.now > jumpTimer)
-    {
+    //is the player trying to jump?
+    if (checkstring(pressString) && player.body.onFloor() && game.time.now > jumpTimer) {
         playerJump();
         jump = false;
     }
-    if (player.body.onFloor() && game.time.now > runTimer) 
-    {
+
+    //walking animation
+    if (player.body.onFloor() && game.time.now > runTimer) {
         playerShift();
     }
-    if (currentObstacles[curId].obstacle.x < 25) {
+
+    //obstacle hitting wall?
+    if (currentObstacles[curId].obstacle.x < 10) {
         removeObstacle(curId);
         renderObstacle();
-        pressString = randomStr(4);
+        pressString = randomStr();
     }
 
-    if (leftKey.isDown)
-    {
+    //arrow key handlers
+    if (leftKey.isDown) {
         player.body.velocity.x = -200;
     }
-
-    if (rightKey.isDown)
-    {
+    if (rightKey.isDown) {
         player.body.velocity.x = 200;
     }
-
-
 }
 //add all keys pressed to string
 function key(keycode) {
@@ -116,38 +121,50 @@ function checkjump() {
     return false;
 }
 
+//check for any given input string
 function checkstring(str) {
-    var contains = false;
     if (keystring.length >= str.length) {
         var all = true;
         var end = keystring.substr(keystring.length - str.length);
         for (var i = 0; i < str.length; i++) {
-            if (!end.includes(str[i]))
+            if (!end.includes(str[i])) {
                 all = false;
+                break
+            }
         }
-        keystring = keystring.slice(0,keystring.length - str.length);
+        if (all)
+            keystring = "";//keystring.slice(0,keystring.length - str.length);
         return all;
     }
-    return contains;
+    return false;
 }
 
-function buttonHandler() {
-    var buttonCombo = "";
-    if (space.isDown)
-        buttonCombo += "space";
-    return buttonCombo;
+//create a random string of length siz
+function randomStr(siz = 4) {
+    str = "";
+    var char;
+    while (str.length < siz) {
+        char = String.fromCharCode(Math.floor(Math.random() * 26) + 65);
+        if (!str.includes(char))
+            str += char;
+    }
+    console.log(str);
+    return str;
 }
 
+//mark an obstacle for destroy
 function removeObstacle(id) {
     currentObstacles[id].obstacle.pendingDestroy = true;
 }
 
+//make the player jump
 function playerJump() {
     player.frame = 6
     player.body.velocity.y = -750;
     jumpTimer = game.time.now + 750;
 }
 
+//adjust the frame of the sprite
 function playerShift() {
     runTimer = game.time.now + 250;
     player.frame = player.frame % 4 + 5
@@ -156,7 +173,9 @@ function playerShift() {
 function collisionHandler (obj1, obj2) {
     game.stage.backgroundColor = '#992d2d';
     console.log('BOOM')
-    currentObstacles[curId].obstacle.pendingDestroy = true;
+
+    //for now we destroy the obstacle and send another
+    removeObstacle(curId);
     renderObstacle();
 }
 
@@ -197,23 +216,17 @@ function initObstacles() {
 // render new obstacle objects based on random Id.
 function renderObstacle() {
     curId++;
-	currentObstacles.push(new obstacle(curId % 2));
+	currentObstacles.push(new obstacle(curId));
 }
 
-function randomStr(siz) {
-    str = "";
-    for (var i = 0; i < siz; i++)
-        str += String.fromCharCode(Math.floor(Math.random() * 26) + 65)
-    console.log(str);
-    return str;
-}
-
+// abstract class to hold different types of obstacles
 class obstacle {
 	constructor(id) {
-        var obstacle = obstacles[id];
+        var index = Math.floor(Math.random()*2)
+        var obstacle = obstacles[index];
 		this.id = id;
 
-		this.obstacle = game.add.sprite(900, 600, obstacles[id].name);
+		this.obstacle = game.add.sprite(900, 600, obstacles[index].name);
         this.obstacle.frame = obstacle.frame;
         this.obstacle.width = obstacle.width;
         this.obstacle.height = obstacle.height;
