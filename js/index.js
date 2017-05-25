@@ -5,7 +5,8 @@ var game = new Phaser.Game(800, 600, Phaser.CANVAS, 'Keystroke', { preload: prel
 function preload() {
     game.load.spritesheet('dude', 'assets/dude.png', 32, 48);
     game.load.image('background', 'assets/background.png');
-    game.load.image('mushroom', 'assets/mushroom.png');
+    game.load.spritesheet('mushroom', 'assets/mushroom.png');
+    game.load.spritesheet('fireball', 'assets/fireball.png', 32, 48);
 }
 // define initial parameters
 var player;
@@ -15,7 +16,10 @@ var runTimer = 0;
 var cursors;
 var space;
 var bg;
+
 var obstacles = [];
+var currentObstacles = []
+
 var curId = -1;
 var jkey;
 var ukey;
@@ -35,6 +39,7 @@ function create() {
     // Define player
     player = game.add.sprite(150, 320, 'dude');
     player.frame = 5;
+
     game.physics.enable(player, Phaser.Physics.ARCADE);
 
     player.body.collideWorldBounds = true;
@@ -43,6 +48,7 @@ function create() {
     player.body.setSize(20, 32, 5, 16);
 
     // Define obstacle
+    initObstacles()
     renderObstacle();
 
     cursors = game.input.keyboard.createCursorKeys();
@@ -56,7 +62,7 @@ function create() {
 
 function update() {
     player.body.velocity.x = 0;
-    game.physics.arcade.collide(player, obstacles[curId].obstacle, collisionHandler, null, this);
+    game.physics.arcade.collide(player, currentObstacles[curId].obstacle, collisionHandler, null, this);
 
 
 
@@ -69,7 +75,7 @@ function update() {
     {
         playerShift();
     }
-    if (obstacles[curId].obstacle.x < 25) {
+    if (currentObstacles[curId].obstacle.x < 25) {
         removeObstacle(curId);
         renderObstacle();
     }
@@ -137,7 +143,7 @@ function buttonHandler() {
 }
 
 function removeObstacle(id) {
-    obstacles[id].obstacle.pendingDestroy = true;
+    currentObstacles[id].obstacle.pendingDestroy = true;
 }
 
 function playerJump() {
@@ -154,24 +160,44 @@ function playerShift() {
 function collisionHandler (obj1, obj2) {
     game.stage.backgroundColor = '#992d2d';
     console.log('BOOM')
-    obstacles[curId].obstacle.pendingDestroy = true;
+    currentObstacles[curId].obstacle.pendingDestroy = true;
     renderObstacle();
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Obstacle Code
+
+function initObstacles() {
+    obstacles = [
+        'mushroom',
+        'fireball'
+    ]
+}
+
+
+// render new obstacle objects based on random Id.
 function renderObstacle() {
     curId++;
-	obstacles.push(new obstacle(curId));
+	currentObstacles.push(new obstacle(curId % 2));
+    console.log('renderObstacles')
 }
+
+
 
 class obstacle {
 	constructor(id) {
+        console.log(id)
 		this.id = id;
-		this.obstacle = game.add.sprite(900, 600, 'mushroom');
-    	this.obstacle.name = 'mushroom';
+        console.log(obstacles[id])
+		this.obstacle = game.add.sprite(900, 600, obstacles[id]);
+        this.obstacle.frame = 0;
+        this.obstacle.width = 50;
+        this.obstacle.height = 50;
+    	this.obstacle.name = obstacles[id];
    
     	game.physics.enable(this.obstacle, Phaser.Physics.ARCADE);
     
-    	this.obstacle.body.velocity.x = -Math.random()*(100 + 5*curId) - 100 - 5*curId
+    	this.obstacle.body.velocity.x = -50;
     	this.obstacle.body.collideWorldBounds = true;
         this.obstacle.immovable = true;
 	}
