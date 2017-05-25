@@ -16,6 +16,8 @@ var runTimer = 0;
 var cursors;
 var space;
 var bg;
+var pressString = "JUMP";
+
 
 var obstacles = [];
 var currentObstacles = []
@@ -57,9 +59,7 @@ function update() {
     player.body.velocity.x = 0;
     game.physics.arcade.collide(player, currentObstacles[curId].obstacle, collisionHandler, null, this);
 
-
-
-    if (checkjump() && player.body.onFloor() && game.time.now > jumpTimer)
+    if (checkstring(pressString) && player.body.onFloor() && game.time.now > jumpTimer)
     {
         playerJump();
         jump = false;
@@ -71,6 +71,7 @@ function update() {
     if (currentObstacles[curId].obstacle.x < 25) {
         removeObstacle(curId);
         renderObstacle();
+        pressString = randomStr(4);
     }
 
 
@@ -82,8 +83,6 @@ function key(keycode) {
 
 //check for jump
 function checkjump() {
-    //console.log(keystring);
-    //console.log(keystring.length);
     if (keystring.length >= 4) {
         var last4 = keystring.substr(keystring.length - 4);
         if (last4.includes("J") && last4.includes("U") && last4.includes("M") && last4.includes("P")) {
@@ -94,7 +93,20 @@ function checkjump() {
     return false;
 }
 
-
+function checkstring(str) {
+    var contains = false;
+    if (keystring.length >= str.length) {
+        var all = true;
+        var end = keystring.substr(keystring.length - str.length);
+        for (var i = 0; i < str.length; i++) {
+            if (!end.includes(str[i]))
+                all = false;
+        }
+        keystring = keystring.slice(0,keystring.length - str.length);
+        return all;
+    }
+    return contains;
+}
 
 function buttonHandler() {
     var buttonCombo = "";
@@ -140,16 +152,18 @@ function initObstacles() {
 function renderObstacle() {
     curId++;
 	currentObstacles.push(new obstacle(curId % 2));
-    console.log('renderObstacles')
 }
 
-
+function randomStr(siz) {
+    str = "";
+    for (var i = 0; i < siz; i++)
+        str += String.fromCharCode(Math.floor(Math.random() * 26) + 65)
+    return str;
+}
 
 class obstacle {
 	constructor(id) {
-        console.log(id)
 		this.id = id;
-        console.log(obstacles[id])
 		this.obstacle = game.add.sprite(900, 600, obstacles[id]);
         this.obstacle.frame = 0;
         this.obstacle.width = 50;
@@ -158,7 +172,7 @@ class obstacle {
    
     	game.physics.enable(this.obstacle, Phaser.Physics.ARCADE);
     
-    	this.obstacle.body.velocity.x = -50;
+    	this.obstacle.body.velocity.x = -250;
     	this.obstacle.body.collideWorldBounds = true;
         this.obstacle.immovable = true;
 	}
