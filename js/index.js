@@ -13,13 +13,12 @@ var facing = 'idle';
 var jumpTimer = 0;
 var runTimer = 0;
 var cursors;
-var jumpButton;
+var space;
 var bg;
 var obstacles = [];
-var curId = 0;
+var curId = -1;
 
 function create() {
-
     game.physics.startSystem(Phaser.Physics.ARCADE);
     game.world.setBounds(0, 0, 1000, 600);
     // Define background
@@ -39,48 +38,61 @@ function create() {
     player.body.setSize(20, 32, 5, 16);
 
     // Define obstacle
-    
     renderObstacle();
 
-
     cursors = game.input.keyboard.createCursorKeys();
-    jumpButton = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
-
+    space = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 }
 
 function update() {
     player.body.velocity.x = 0;
-    game.physics.arcade.collide(player, obstacles[0].obstacle, collisionHandler, null, this);
+    game.physics.arcade.collide(player, obstacles[curId].obstacle, collisionHandler, null, this);
 
-    if (jumpButton.isDown && player.body.onFloor() && game.time.now > jumpTimer)
+    if (buttonHandler().search("space") > -1 && player.body.onFloor() && game.time.now > jumpTimer)
     {
-        player.frame = 6
-        player.body.velocity.y = -750;
-        jumpTimer = game.time.now + 750;
+        playerJump();
     }
     if (player.body.onFloor() && game.time.now > runTimer) 
     {
-        runTimer = game.time.now + 250
-        player.frame = (player.frame % 4 + 5)
+        playerShift();
     }
-    if (obstacles[0].obstacle.x < 25) {
-        // renderObstacle();
-        obstacles[0].obstacle.pendingDestroy = true;
-        obstacles.pop(0);
+    if (obstacles[curId].obstacle.x < 25) {
+        removeObstacle(curId);
         renderObstacle();
     }
 }
-function collisionHandler (obj1, obj2) {
 
+function buttonHandler() {
+    var buttonCombo = "";
+    if (space.isDown)
+        buttonCombo += "space";
+    return buttonCombo;
+}
+
+function removeObstacle(id) {
+    obstacles[id].obstacle.pendingDestroy = true;
+}
+
+function playerJump() {
+    player.frame = 6
+    player.body.velocity.y = -750;
+    jumpTimer = game.time.now + 750;
+}
+
+function playerShift() {
+    runTimer = game.time.now + 250;
+    player.frame = player.frame % 4 + 5
+}
+
+function collisionHandler (obj1, obj2) {
     game.stage.backgroundColor = '#992d2d';
     console.log('BOOM')
-    game.destroy();
-
+    player.pendingDestroy = true;
 }
 
 function renderObstacle () {
-	obstacles.push(new obstacle(curId));
     curId++;
+	obstacles.push(new obstacle(curId));
 }
 
 class obstacle {
@@ -102,5 +114,4 @@ function render () {
     // game.debug.text(game.time.physicsElapsed, 32, 32);
     // game.debug.body(player);
     game.debug.bodyInfo(player, 16, 24);
-
 }
