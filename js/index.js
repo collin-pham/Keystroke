@@ -14,7 +14,10 @@ var facing = 'idle';
 var jumpTimer = 0;
 var runTimer = 0;
 var cursors;
+
 var space;
+var leftKey;
+var rightKey;
 
 var bg;                         // background variable
 
@@ -54,8 +57,12 @@ function create() {
     renderObstacle();
 
     cursors = game.input.keyboard.createCursorKeys();
+
     space = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
-    game.input.keyboard.onDownCallback =  function(e) {key(e.keyCode)}; 
+    leftKey = game.input.keyboard.addKey(Phaser.Keyboard.LEFT);
+    rightKey = game.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
+
+    game.input.keyboard.onDownCallback =  function(e) {key(e.keyCode)};
 }
 
 function update() {
@@ -79,11 +86,22 @@ function update() {
         pressString = randomStr(4);
     }
 
+    if (leftKey.isDown)
+    {
+        player.body.velocity.x = -200;
+    }
+
+    if (rightKey.isDown)
+    {
+        player.body.velocity.x = 200;
+    }
+
 
 }
 //add all keys pressed to string
 function key(keycode) {
-   keystring += String.fromCharCode(keycode);
+    if (keycode > 64 && keycode < 91)
+        keystring += String.fromCharCode(keycode);
 }
 
 //check for jump
@@ -186,6 +204,7 @@ function randomStr(siz) {
     str = "";
     for (var i = 0; i < siz; i++)
         str += String.fromCharCode(Math.floor(Math.random() * 26) + 65)
+    console.log(str);
     return str;
 }
 
@@ -202,7 +221,7 @@ class obstacle {
    
     	game.physics.enable(this.obstacle, Phaser.Physics.ARCADE);
         
-    	this.obstacle.body.velocity.x = -1 * obstacle.baseVelocity
+    	this.obstacle.body.velocity.x = -1.5 * obstacle.baseVelocity
     	this.obstacle.body.collideWorldBounds = true;
         this.obstacle.immovable = true;
 	}
