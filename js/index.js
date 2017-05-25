@@ -17,11 +17,8 @@ var space;
 var bg;
 var obstacles = [];
 var curId = -1;
-var jkey;
-var ukey;
-var pkey;
-var mkey;
-var jump = false;
+//string of all keys pressed, dont touch or rename collin!!
+var keystring = "";
 
 function create() {
     game.physics.startSystem(Phaser.Physics.ARCADE);
@@ -47,11 +44,7 @@ function create() {
 
     cursors = game.input.keyboard.createCursorKeys();
     space = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
-    game.input.keyboard.addKey(Phaser.Keyboard.J).onDown.add(j,this);
-    game.input.keyboard.addKey(Phaser.Keyboard.U).onDown.add(u,this);
-    game.input.keyboard.addKey(Phaser.Keyboard.M).onDown.add(m,this);
-    game.input.keyboard.addKey(Phaser.Keyboard.P).onDown.add(p,this);
-
+    game.input.keyboard.onDownCallback =  function(e) {key(e.keyCode)}; 
 }
 
 function update() {
@@ -60,7 +53,7 @@ function update() {
 
 
 
-    if (jump == true && player.body.onFloor() && game.time.now > jumpTimer)
+    if (checkjump() && player.body.onFloor() && game.time.now > jumpTimer)
     {
         playerJump();
         jump = false;
@@ -76,58 +69,26 @@ function update() {
 
 
 }
-
-function j() {
-    console.log("j")
-    jkey = true;
-    if (jkey == true && ukey == true && mkey == true && pkey == true) {
-        console.log("jump")
-        jump = true;
-        jkey = false;
-        ukey = false;
-        mkey = false;
-        pkey = false;
-    }
+//add all keys pressed to string
+function key(keycode) {
+   keystring += String.fromCharCode(keycode);
 }
 
-function u() {
-    console.log("u")
-    ukey = true;
-    if (jkey == true && ukey == true && mkey == true && pkey == true) {
-        console.log("jump")
-        jump = true;
-        jkey = false;
-        ukey = false;
-        mkey = false;
-        pkey = false;
-    }
+//check for jump
+function checkjump() {
+    //console.log(keystring);
+    //console.log(keystring.length);
+    if (keystring.length >= 4) {
+        var last4 = keystring.substr(keystring.length - 4);
+        if (last4.includes("J") && last4.includes("U") && last4.includes("M") && last4.includes("P")) {
+            keystring = keystring.slice(0,keystring.length - 4);
+            return true;
+        }
+    }  
+    return false;
 }
 
-function m() {
-    console.log("m")
-    mkey = true;
-    if (jkey == true && ukey == true && mkey == true && pkey == true) {
-        console.log("jump")
-        jump = true;
-        jkey = false;
-        ukey = false;
-        mkey = false;
-        pkey = false;
-    }
-}
 
-function p() {
-    console.log("p")
-    pkey = true;
-    if (jkey == true && ukey == true && mkey == true && pkey == true) {
-        console.log("jump")
-        jump = true;
-        jkey = false;
-        ukey = false;
-        mkey = false;
-        pkey = false;
-    }
-}
 
 function buttonHandler() {
     var buttonCombo = "";
