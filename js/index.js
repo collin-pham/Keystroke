@@ -17,6 +17,11 @@ var space;
 var bg;
 var obstacles = [];
 var curId = -1;
+var jkey;
+var ukey;
+var pkey;
+var mkey;
+var jump = false;
 
 function create() {
     game.physics.startSystem(Phaser.Physics.ARCADE);
@@ -42,15 +47,23 @@ function create() {
 
     cursors = game.input.keyboard.createCursorKeys();
     space = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+    game.input.keyboard.addKey(Phaser.Keyboard.J).onDown.add(j,this);
+    game.input.keyboard.addKey(Phaser.Keyboard.U).onDown.add(u,this);
+    game.input.keyboard.addKey(Phaser.Keyboard.M).onDown.add(m,this);
+    game.input.keyboard.addKey(Phaser.Keyboard.P).onDown.add(p,this);
+
 }
 
 function update() {
     player.body.velocity.x = 0;
     game.physics.arcade.collide(player, obstacles[curId].obstacle, collisionHandler, null, this);
 
-    if (buttonHandler().search("space") > -1 && player.body.onFloor() && game.time.now > jumpTimer)
+
+
+    if (jump == true && player.body.onFloor() && game.time.now > jumpTimer)
     {
         playerJump();
+        jump = false;
     }
     if (player.body.onFloor() && game.time.now > runTimer) 
     {
@@ -59,6 +72,60 @@ function update() {
     if (obstacles[curId].obstacle.x < 25) {
         removeObstacle(curId);
         renderObstacle();
+    }
+
+
+}
+
+function j() {
+    console.log("j")
+    jkey = true;
+    if (jkey == true && ukey == true && mkey == true && pkey == true) {
+        console.log("jump")
+        jump = true;
+        jkey = false;
+        ukey = false;
+        mkey = false;
+        pkey = false;
+    }
+}
+
+function u() {
+    console.log("u")
+    ukey = true;
+    if (jkey == true && ukey == true && mkey == true && pkey == true) {
+        console.log("jump")
+        jump = true;
+        jkey = false;
+        ukey = false;
+        mkey = false;
+        pkey = false;
+    }
+}
+
+function m() {
+    console.log("m")
+    mkey = true;
+    if (jkey == true && ukey == true && mkey == true && pkey == true) {
+        console.log("jump")
+        jump = true;
+        jkey = false;
+        ukey = false;
+        mkey = false;
+        pkey = false;
+    }
+}
+
+function p() {
+    console.log("p")
+    pkey = true;
+    if (jkey == true && ukey == true && mkey == true && pkey == true) {
+        console.log("jump")
+        jump = true;
+        jkey = false;
+        ukey = false;
+        mkey = false;
+        pkey = false;
     }
 }
 
