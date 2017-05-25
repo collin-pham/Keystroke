@@ -87,7 +87,8 @@ function playerShift() {
 function collisionHandler (obj1, obj2) {
     game.stage.backgroundColor = '#992d2d';
     console.log('BOOM')
-    player.pendingDestroy = true;
+    obstacles[curId].obstacle.pendingDestroy = true;
+    renderObstacle();
 }
 
 function renderObstacle() {
@@ -103,7 +104,7 @@ class obstacle {
    
     	game.physics.enable(this.obstacle, Phaser.Physics.ARCADE);
     
-    	this.obstacle.body.velocity.x = -Math.random()*100 - 100
+    	this.obstacle.body.velocity.x = -Math.random()*(100 + 5*curId) - 100 - 5*curId
     	this.obstacle.body.collideWorldBounds = true;
         this.obstacle.immovable = true;
 	}
