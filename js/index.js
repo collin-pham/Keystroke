@@ -98,11 +98,11 @@ function update() {
     //arrow key handlers
     if (leftKey.isDown) {
         player.body.velocity.x = -200;
-        shift += .3;
+        shift -= .3;
     }
     if (rightKey.isDown) {
         player.body.velocity.x = 200;
-        shift -= .3;
+        shift += .3;
     }
     //makes world look like its moving
     bg.tilePosition.x -= shift;
