@@ -58,7 +58,7 @@ function create() {
     initObstacles()
     renderObstacle();
 
-    cursors = game.input.keyboard.createCursorKeys();
+    // cursors = game.input.keyboard.createCursorKeys();
 
     //initialize arrow keys
     leftKey = game.input.keyboard.addKey(Phaser.Keyboard.LEFT);
@@ -69,7 +69,7 @@ function create() {
 }
 
 function update() {
-    bg.tilePosition.x -= .5;
+    var shift = .7;
 
     //so player doesn't slide around
     player.body.velocity.x = 0;
@@ -98,10 +98,14 @@ function update() {
     //arrow key handlers
     if (leftKey.isDown) {
         player.body.velocity.x = -200;
+        shift += .3;
     }
     if (rightKey.isDown) {
         player.body.velocity.x = 200;
+        shift -= .3;
     }
+    //makes world look like its moving
+    bg.tilePosition.x -= shift;
 }
 //add all keys pressed to string
 function key(keycode) {
@@ -262,9 +266,13 @@ function changeJumpString() {
 }
 
 
-
 function render () {
-    // game.debug.text(game.time.physicsElapsed, 32, 32);
+    // var ti = "Time: "+game.time.physicsElapsed.toString();
+    var ob = "Obstacles Cleared: "+parseInt(curId, 10).toString();
+    // console.log(time);
+    // console.log(obstacle);
+    // game.debug.text(ti, 32, 64);
+    game.debug.text(ob, 32, 32);
     // game.debug.body(player);
-    game.debug.bodyInfo(player, 16, 24);
+    // game.debug.bodyInfo(player, 16, 24);
 }
