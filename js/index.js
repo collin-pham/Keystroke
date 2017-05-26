@@ -265,10 +265,12 @@ function changeJumpString() {
 function render () {
     // var ti = "Time: "+game.time.physicsElapsed.toString();
     var ob = "Obstacles Cleared: "+parseInt(curId, 10).toString();
+    var typ = "Type "+pressString+" To Jump!"
     // console.log(time);
     // console.log(obstacle);
     // game.debug.text(ti, 32, 64);
     game.debug.text(ob, 32, 32);
+    game.debug.text(typ, 32, 64);
     // game.debug.body(player);
     // game.debug.bodyInfo(player, 16, 24);
 }
