@@ -65,7 +65,7 @@ function create() {
     rightKey = game.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
 
     //create handler for rest of keyboard
-    game.input.keyboard.onDownCallback =  function(e) {key(e.keyCode)};
+    game.input.keyboard.onDownCallback =  function(e) {key(e.keyCode);};
 }
 
 function update() {
@@ -128,17 +128,13 @@ function checkjump() {
 //check for any given input string
 function checkstring(str) {
     if (keystring.length >= str.length) {
-        var all = true;
         var end = keystring.substr(keystring.length - str.length);
         for (var i = 0; i < str.length; i++) {
-            if (!end.includes(str[i])) {
-                all = false;
-                break
-            }
+            if (!end.includes(str[i]))
+                return false;
         }
-        if (all)
-            keystring = "";//keystring.slice(0,keystring.length - str.length);
-        return all;
+        keystring = "";//keystring.slice(0,keystring.length - str.length);
+        return true;
     }
     return false;
 }
