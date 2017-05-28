@@ -14,6 +14,7 @@ var facing = 'idle';
 var jumpTimer = 0;
 var runTimer = 0;
 var cursors;
+var BASE_TIME = 1000000000;
 
 //for movement aside from keyboard input
 var leftKey;
@@ -69,7 +70,7 @@ function create() {
 }
 
 function update() {
-    var shift = .7;
+    var shift = 1;
 
     //so player doesn't slide around
     player.body.velocity.x = 0;
@@ -92,7 +93,7 @@ function update() {
     if (currentObstacles[curId].obstacle.x < 10) {
         removeObstacle(curId);
         renderObstacle();
-        pressString = randomStr();
+        pressString = randomStr(caculateJumpStringLength());
     }
 
     //arrow key handlers
@@ -105,7 +106,7 @@ function update() {
         shift += .3;
     }
     //makes world look like its moving
-    bg.tilePosition.x -= shift;
+    bg.tilePosition.x -= changeBackgroundVelocity(shift);
 }
 //add all keys pressed to string
 function key(keycode) {
@@ -148,7 +149,7 @@ function randomStr(siz = 4) {
         if (!str.includes(char))
             str += char;
     }
-    console.log(str);
+    // console.log(str);
     return str;
 }
 
@@ -234,7 +235,7 @@ class obstacle {
    
     	game.physics.enable(this.obstacle, Phaser.Physics.ARCADE);
         
-    	this.obstacle.body.velocity.x = -1.5 * obstacle.baseVelocity
+    	this.obstacle.body.velocity.x = -.5 * changeObstacleVelocity(obstacle);
     	this.obstacle.body.collideWorldBounds = true;
         this.obstacle.immovable = true;
 	}
@@ -246,19 +247,23 @@ Difficulty Code
 ******************************************************************/
 
 function changeObstacleVelocity(obstacle) {
-
+    return calculateRatio()*(obstacle.maxVelocity-obstacle.baseVelocity)+obstacle.baseVelocity;
 }
 
-function changeBackgroundVelocity() {
-
+function changeBackgroundVelocity(num) {
+    return calculateRatio()*num;
 }
 
 function changePlatformVelocity() {
 
 }
 
-function changeJumpString() {
+function caculateJumpStringLength() {
+    return Math.floor(calculateRatio()*6);
+}
 
+function calculateRatio() {
+    return Math.log(game.time.now)/Math.log(BASE_TIME)
 }
 
 
