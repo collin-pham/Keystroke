@@ -6,13 +6,15 @@ function preload() {
     game.load.spritesheet('dude', 'assets/dude.png', 32, 48);
     game.load.image('background', 'assets/background.png');
     game.load.spritesheet('mushroom', 'assets/mushroom.png');
-    game.load.spritesheet('fireball', 'assets/fireball.png', 48, 48);
+    game.load.spritesheet('fireball', 'assets/fireball.png', 52, 42);
+    game.load.spritesheet('crab', 'assets/crab.png', 131, 129);
 }
 // define initial parameters
 var player;
 var facing = 'idle';
 var jumpTimer = 0;
 var runTimer = 0;
+var frameTimer = 0;
 var cursors;
 
 var BASE_TIME = 2.2;
@@ -72,7 +74,6 @@ function create() {
 }
 
 function update() {
-    console.log(calculateRatio())
     var shift = 3;
 
     //so player doesn't slide around
@@ -90,6 +91,9 @@ function update() {
     //walking animation
     if (player.body.onFloor() && game.time.now > runTimer) {
         playerShift();
+    }
+    if (game.time.now > frameTimer) {
+        animate();
     }
 
     //obstacle hitting wall?
@@ -152,7 +156,6 @@ function randomStr(siz = 4) {
         if (!str.includes(char))
             str += char;
     }
-    // console.log(str);
     return str;
 }
 
@@ -172,6 +175,16 @@ function playerJump() {
 function playerShift() {
     runTimer = game.time.now + 250;
     player.frame = player.frame % 4 + 5
+}
+
+//checks the obstacle to see if it should increment the frame and by how much
+function animate() {
+    if (currentObstacles[curId].shift) {
+        frameTimer = game.time.now + currentObstacles[curId].shiftFreq;
+        currentObstacles[curId].obstacle.frame = currentObstacles[curId].obstacle.frame + 1;
+    }
+    else
+        frameTimer += 1000;
 }
 
 function collisionHandler (obj1, obj2) {
@@ -197,7 +210,9 @@ function initObstacles() {
         maxVelocity: 1000,
         name: 'mushroom',
         width: 50,
-        onGround: true
+        onGround: true,
+        shiftFreq: 50,
+        shift: false
     }
     const fireball = {
         action: 'jump',
@@ -207,12 +222,27 @@ function initObstacles() {
         maxVelocity: 1000,
         name: 'fireball',
         width: 100,
-        onGround: true
+        onGround: true,
+        shiftFreq: 50,
+        shift: false
+    }
+    const crab = {
+        action: 'jump',
+        baseVelocity: 100,
+        frame: 0,
+        height: 80,
+        maxVelocity: 1000,
+        name: 'crab',
+        width: 80,
+        onGround: true,
+        shiftFreq: 50,
+        shift: true
     }
 
     obstacles = [
         mushroom, 
-        fireball
+        fireball,
+        crab
     ]
     
 }
@@ -226,7 +256,7 @@ function renderObstacle() {
 // abstract class to hold different types of obstacles
 class obstacle {
 	constructor(id) {
-        var obstacle = obstacles[Math.floor(Math.random()*2)];
+        var obstacle = obstacles[Math.floor(Math.random()*3)];
 		this.id = id;
 
 		this.obstacle = game.add.sprite(900, 600, obstacle.name);
@@ -234,6 +264,8 @@ class obstacle {
         this.obstacle.width = obstacle.width;
         this.obstacle.height = obstacle.height;
     	this.obstacle.name = obstacle.name;
+        this.shiftFreq = obstacle.shiftFreq;
+        this.shift = obstacle.shift;
    
     	game.physics.enable(this.obstacle, Phaser.Physics.ARCADE);
         
@@ -266,20 +298,13 @@ function caculateJumpStringLength() {
 
 function calculateRatio() {
     var ratio = Math.exp(game.time.now/timeDivisor)/Math.exp(BASE_TIME);
-    // console.log(ratio,Math.exp(BASE_TIME/divisor));
     return ratio;
 }
 
 
 function render () {
-    // var ti = "Time: "+game.time.physicsElapsed.toString();
     var ob = "Obstacles Cleared: "+parseInt(curId, 10).toString();
     var typ = "Type "+pressString+" To Jump!"
-    // console.log(time);
-    // console.log(obstacle);
-    // game.debug.text(ti, 32, 64);
     game.debug.text(ob, 32, 32);
     game.debug.text(typ, 32, 64);
-    // game.debug.body(player);
-    // game.debug.bodyInfo(player, 16, 24);
 }
