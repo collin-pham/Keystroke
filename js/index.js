@@ -9,14 +9,22 @@ function preload() {
     game.load.spritesheet('button', 'assets/pause.png', 321, 311);
 
     game.load.spritesheet('mushroom', 'assets/mushroom.png');
-    game.load.spritesheet('fireball', 'assets/fireball.png', 48, 48);
+
+    game.load.spritesheet('platform', 'assets/LargePlatform.png', 130, 50);
+
+    game.load.spritesheet('fireball', 'assets/fireball.png', 52, 42);
+    game.load.spritesheet('crab', 'assets/crab.png', 131, 129);
+
 }
 // define initial parameters
 var player;
 var facing = 'idle';
 var jumpTimer = 0;
 var runTimer = 0;
+var frameTimer = 0;
 var cursors;
+var BASE_TIME = 2.2;
+var timeDivisor = 100000;
 
 //for movement aside from keyboard input
 var leftKey;
@@ -34,6 +42,8 @@ var curId = -1;
 
 //string of all keys pressed, dont touch or rename collin!!
 var keystring = "";
+
+var platforms;
 
 /////////////////////////// RIGHT NOW THE PLAYER CAN GO FURTHER RIGHT THAN WHERE OBSTACLES SPAWN. FIX AT SOME POINT BY LIMITING PLAYER /////////
 
@@ -65,6 +75,17 @@ function create() {
     menu_button = game.add.button(750, 10, 'button', handleMenu, this, 2, 1, 0);
     menu_button.scale.setTo(.1, .1);
 
+    //platforms
+    platforms = game.add.group();
+    platforms.physicsBodyType = Phaser.Physics.ARCADE;
+    var p = platforms.create(10, 450, 'platform');
+    game.physics.enable(p, Phaser.Physics.ARCADE);
+    p.body.allowGravity = false;
+    p.body.immovable = true;
+    p.body.velocity.x = 10;
+    p.body.velocity.y = 0;
+
+
     // cursors = game.input.keyboard.createCursorKeys();
 
     //initialize arrow keys
@@ -80,7 +101,7 @@ function create() {
 }
 
 function update() {
-    var shift = .7;
+    var shift = 3;
 
     //so player doesn't slide around
     player.body.velocity.x = 0;
@@ -102,25 +123,32 @@ function update() {
     if (player.body.onFloor() && game.time.now > runTimer) {
         playerShift();
     }
+    if (game.time.now > frameTimer) {
+        animate();
+    }
 
     //obstacle hitting wall?
     if (currentObstacles[curId].obstacle.x < 10) {
         removeObstacle(curId);
         renderObstacle();
-        pressString = randomStr();
+        pressString = randomStr(caculateJumpStringLength());
     }
 
     //arrow key handlers
     if (leftKey.isDown) {
         player.body.velocity.x = -200;
-        shift -= .3;
+        shift *= .6;
     }
     if (rightKey.isDown) {
         player.body.velocity.x = 200;
-        shift += .3;
+        shift *= 1.4;
     }
     //makes world look like its moving
-    bg.tilePosition.x -= shift;
+    bg.tilePosition.x -= changeBackgroundVelocity(shift);
+
+
+    game.physics.arcade.collide(player, platforms);
+
 }
 //add all keys pressed to string
 function key(keycode) {
@@ -163,7 +191,6 @@ function randomStr(siz = 4) {
         if (!str.includes(char))
             str += char;
     }
-    console.log(str);
     return str;
 }
 
@@ -185,13 +212,27 @@ function playerShift() {
     player.frame = player.frame % 4 + 5
 }
 
+//checks the obstacle to see if it should increment the frame and by how much
+function animate() {
+    if (currentObstacles[curId].shift) {
+        frameTimer = game.time.now + currentObstacles[curId].shiftFreq;
+        currentObstacles[curId].obstacle.frame = currentObstacles[curId].obstacle.frame + 1;
+    }
+    else
+        frameTimer += 1000;
+}
+
 function collisionHandler (obj1, obj2) {
-    game.stage.backgroundColor = '#992d2d';
+    game.stage.backgroundColor = 'red';
     console.log('BOOM')
 
     //for now we destroy the obstacle and send another
     removeObstacle(curId);
     renderObstacle();
+    // curId = 0;
+    // player.x = 150
+    // player.y = 320
+    
 }
 
 /*****************************************************************
@@ -208,7 +249,9 @@ function initObstacles() {
         maxVelocity: 1000,
         name: 'mushroom',
         width: 50,
-        onGround: true
+        onGround: true,
+        shiftFreq: 50,
+        shift: false
     }
     const fireball = {
         action: 'jump',
@@ -218,12 +261,27 @@ function initObstacles() {
         maxVelocity: 1000,
         name: 'fireball',
         width: 100,
-        onGround: true
+        onGround: true,
+        shiftFreq: 50,
+        shift: false
+    }
+    const crab = {
+        action: 'jump',
+        baseVelocity: 100,
+        frame: 0,
+        height: 80,
+        maxVelocity: 1000,
+        name: 'crab',
+        width: 80,
+        onGround: true,
+        shiftFreq: 50,
+        shift: true
     }
 
     obstacles = [
         mushroom, 
-        fireball
+        fireball,
+        crab
     ]
     
 }
@@ -237,19 +295,20 @@ function renderObstacle() {
 // abstract class to hold different types of obstacles
 class obstacle {
 	constructor(id) {
-        var index = Math.floor(Math.random()*2)
-        var obstacle = obstacles[index];
+        var obstacle = obstacles[Math.floor(Math.random()*3)];
 		this.id = id;
 
-		this.obstacle = game.add.sprite(900, 600, obstacles[index].name);
+		this.obstacle = game.add.sprite(900, 600, obstacle.name);
         this.obstacle.frame = obstacle.frame;
         this.obstacle.width = obstacle.width;
         this.obstacle.height = obstacle.height;
     	this.obstacle.name = obstacle.name;
+        this.shiftFreq = obstacle.shiftFreq;
+        this.shift = obstacle.shift;
    
     	game.physics.enable(this.obstacle, Phaser.Physics.ARCADE);
         
-    	this.obstacle.body.velocity.x = -1.5 * obstacle.baseVelocity
+    	this.obstacle.body.velocity.x = -.66 * changeObstacleVelocity(obstacle);
     	this.obstacle.body.collideWorldBounds = true;
         this.obstacle.immovable = true;
 	}
@@ -261,19 +320,24 @@ Difficulty Code
 ******************************************************************/
 
 function changeObstacleVelocity(obstacle) {
-
+    return calculateRatio()*(obstacle.maxVelocity-obstacle.baseVelocity)+obstacle.baseVelocity;
 }
 
-function changeBackgroundVelocity() {
-
+function changeBackgroundVelocity(num) {
+    return calculateRatio()*num;
 }
 
 function changePlatformVelocity() {
 
 }
 
-function changeJumpString() {
+function caculateJumpStringLength() {
+    return Math.floor(calculateRatio()*10);
+}
 
+function calculateRatio() {
+    var ratio = Math.exp(game.time.now/timeDivisor)/Math.exp(BASE_TIME);
+    return ratio;
 }
 
 /*****************************************************************
@@ -353,14 +417,8 @@ Restart Game
 ******************************************************************/
 
 function render () {
-    // var ti = "Time: "+game.time.physicsElapsed.toString();
     var ob = "Obstacles Cleared: "+parseInt(curId, 10).toString();
     var typ = "Type "+pressString+" To Jump!"
-    // console.log(time);
-    // console.log(obstacle);
-    // game.debug.text(ti, 32, 64);
     game.debug.text(ob, 32, 32);
     game.debug.text(typ, 32, 64);
-    // game.debug.body(player);
-    // game.debug.bodyInfo(player, 16, 24);
 }
