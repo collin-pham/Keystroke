@@ -5,6 +5,9 @@ var game = new Phaser.Game(800, 600, Phaser.CANVAS, 'Keystroke', { preload: prel
 function preload() {
     game.load.spritesheet('dude', 'assets/dude.png', 32, 48);
     game.load.image('background', 'assets/background.png');
+
+    game.load.spritesheet('button', 'assets/pause.png', 321, 311);
+
     game.load.spritesheet('mushroom', 'assets/mushroom.png');
     game.load.spritesheet('fireball', 'assets/fireball.png', 48, 48);
 }
@@ -58,14 +61,22 @@ function create() {
     initObstacles()
     renderObstacle();
 
+    // define pause button
+    menu_button = game.add.button(750, 10, 'button', handleMenu, this, 2, 1, 0);
+    menu_button.scale.setTo(.1, .1);
+
     // cursors = game.input.keyboard.createCursorKeys();
 
     //initialize arrow keys
+    spaceKey = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
     leftKey = game.input.keyboard.addKey(Phaser.Keyboard.LEFT);
     rightKey = game.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
 
     //create handler for rest of keyboard
     game.input.keyboard.onDownCallback =  function(e) {key(e.keyCode);};
+
+    // Pass true to show the starting menu
+    handleMenu(true);
 }
 
 function update() {
@@ -76,6 +87,10 @@ function update() {
 
     //physics handler for collisions
     game.physics.arcade.collide(player, currentObstacles[curId].obstacle, collisionHandler, null, this);
+
+    // pause with keyboard
+    if (spaceKey.isDown)
+        handleMenu()
 
     //is the player trying to jump?
     if (checkstring(pressString) && player.body.onFloor() && game.time.now > jumpTimer) {
@@ -109,7 +124,7 @@ function update() {
 }
 //add all keys pressed to string
 function key(keycode) {
-    if (keycode > 64 && keycode < 91)
+    if (keycode > 64 && keycode < 91 && !game.paused)
         keystring += String.fromCharCode(keycode);
 }
 
@@ -261,6 +276,81 @@ function changeJumpString() {
 
 }
 
+/*****************************************************************
+Menu Code
+
+******************************************************************/
+
+function handleMenu(onStart) {
+    onStart = typeof onStart == 'boolean' ? true : false;
+    // pause the game
+    game.paused = !game.paused;
+    menu_button.visible = false;
+
+    var style = {
+        font: "20px Arial", 
+        fill: "#fff",
+        align:"left",
+        boundsAlignH: "top",
+        boundsAlignV:"top",
+        cursor: "pointer"
+    };
+    var text = `Welcome to Keystroke! \nAvoid the obstacles to survive. \nJump by button mashing the correct keys. \nGood luck!`
+        
+    start_button = game.add.text(350, 200, onStart ? 'start' : 'restart', style);
+    resume_button = game.add.text(350, 250, 'resume', style);
+    instruction_button = game.add.text(350, 300, 'instructions', style);
+    back_button = game.add.text(350, 350, 'back', style);
+    instruction_text = game.add.text(350, 200, text, style);
+
+    start_button.inputEnabled = true;
+    resume_button.inputEnabled = true;
+    instruction_button.inputEnabled = true;
+    back_button.inputEnabled = true;
+
+    back_button.visible = false;
+    instruction_text.visible = false;
+
+    start_button.events.onInputDown.add(start, this);
+    resume_button.events.onInputDown.add(resume, this);
+    instruction_button.events.onInputDown.add(instruction, this);
+    back_button.events.onInputDown.add(toggleButtons, this);
+
+    function start () {
+        unpause();
+        menu_button.visible = true;
+    }
+
+    function resume() {
+        unpause();
+        menu_button.visible = true;
+    }
+
+    function instruction () { 
+        toggleButtons();
+    }
+
+    function unpause() {
+        game.paused = !game.paused;
+        start_button.destroy();
+        resume_button.destroy();
+        instruction_button.destroy();
+    }
+    function toggleButtons() {
+        start_button.visible = !start_button.visible;
+        resume_button.visible = !resume_button.visible;
+        instruction_button.visible = !instruction_button.visible;
+        back_button.visible = !back_button.visible;
+        instruction_text.visible = !instruction_text.visible;
+    }
+
+
+}
+
+/*****************************************************************
+Restart Game
+
+******************************************************************/
 
 function render () {
     // var ti = "Time: "+game.time.physicsElapsed.toString();
