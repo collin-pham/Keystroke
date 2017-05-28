@@ -7,6 +7,7 @@ function preload() {
     game.load.image('background', 'assets/background.png');
     game.load.spritesheet('mushroom', 'assets/mushroom.png');
     game.load.spritesheet('fireball', 'assets/fireball.png', 48, 48);
+    game.load.spritesheet('platform', 'assets/LargePlatform.png', 130, 50);
 }
 // define initial parameters
 var player;
@@ -14,7 +15,6 @@ var facing = 'idle';
 var jumpTimer = 0;
 var runTimer = 0;
 var cursors;
-
 var BASE_TIME = 2.2;
 var timeDivisor = 100000;
 
@@ -34,6 +34,8 @@ var curId = -1;
 
 //string of all keys pressed, dont touch or rename collin!!
 var keystring = "";
+
+var platforms;
 
 /////////////////////////// RIGHT NOW THE PLAYER CAN GO FURTHER RIGHT THAN WHERE OBSTACLES SPAWN. FIX AT SOME POINT BY LIMITING PLAYER /////////
 
@@ -61,6 +63,16 @@ function create() {
     initObstacles()
     renderObstacle();
 
+    //platforms
+    platforms = game.add.group();
+    platforms.physicsBodyType = Phaser.Physics.ARCADE;
+    var p = platforms.create(10, 450, 'platform');
+    game.physics.enable(p, Phaser.Physics.ARCADE);
+    p.body.allowGravity = false;
+    p.body.immovable = true;
+    p.body.velocity.x = 10;
+    p.body.velocity.y = 0;
+
     // cursors = game.input.keyboard.createCursorKeys();
 
     //initialize arrow keys
@@ -84,6 +96,7 @@ function update() {
     //is the player trying to jump?
     if (checkstring(pressString) && player.body.onFloor() && game.time.now > jumpTimer) {
         playerJump();
+        jump = false;
     }
 
     //walking animation
@@ -109,6 +122,10 @@ function update() {
     }
     //makes world look like its moving
     bg.tilePosition.x -= changeBackgroundVelocity(shift);
+
+
+    game.physics.arcade.collide(player, platforms);
+
 }
 //add all keys pressed to string
 function key(keycode) {
@@ -179,10 +196,11 @@ function collisionHandler (obj1, obj2) {
 
     //for now we destroy the obstacle and send another
     removeObstacle(curId);
-    curId = 0;
-    player.x = 150
-    player.y = 320
-    //renderObstacle();
+    renderObstacle();
+    // curId = 0;
+    // player.x = 150
+    // player.y = 320
+    
 }
 
 /*****************************************************************
