@@ -14,7 +14,9 @@ var facing = 'idle';
 var jumpTimer = 0;
 var runTimer = 0;
 var cursors;
-var BASE_TIME = 1000000000;
+
+var BASE_TIME = 2.2;
+var timeDivisor = 100000;
 
 //for movement aside from keyboard input
 var leftKey;
@@ -70,7 +72,8 @@ function create() {
 }
 
 function update() {
-    var shift = 1;
+    console.log(calculateRatio())
+    var shift = 3;
 
     //so player doesn't slide around
     player.body.velocity.x = 0;
@@ -98,11 +101,11 @@ function update() {
     //arrow key handlers
     if (leftKey.isDown) {
         player.body.velocity.x = -200;
-        shift -= .3;
+        shift *= .6;
     }
     if (rightKey.isDown) {
         player.body.velocity.x = 200;
-        shift += .3;
+        shift *= 1.4;
     }
     //makes world look like its moving
     bg.tilePosition.x -= changeBackgroundVelocity(shift);
@@ -225,11 +228,10 @@ function renderObstacle() {
 // abstract class to hold different types of obstacles
 class obstacle {
 	constructor(id) {
-        var index = Math.floor(Math.random()*2)
-        var obstacle = obstacles[index];
+        var obstacle = obstacles[Math.floor(Math.random()*2)];
 		this.id = id;
 
-		this.obstacle = game.add.sprite(900, 600, obstacles[index].name);
+		this.obstacle = game.add.sprite(900, 600, obstacle.name);
         this.obstacle.frame = obstacle.frame;
         this.obstacle.width = obstacle.width;
         this.obstacle.height = obstacle.height;
@@ -237,7 +239,7 @@ class obstacle {
    
     	game.physics.enable(this.obstacle, Phaser.Physics.ARCADE);
         
-    	this.obstacle.body.velocity.x = -.5 * changeObstacleVelocity(obstacle);
+    	this.obstacle.body.velocity.x = -.66 * changeObstacleVelocity(obstacle);
     	this.obstacle.body.collideWorldBounds = true;
         this.obstacle.immovable = true;
 	}
@@ -261,11 +263,13 @@ function changePlatformVelocity() {
 }
 
 function caculateJumpStringLength() {
-    return Math.floor(calculateRatio()*6);
+    return Math.floor(calculateRatio()*10);
 }
 
 function calculateRatio() {
-    return Math.log(game.time.now)/Math.log(BASE_TIME)
+    var ratio = Math.exp(game.time.now/timeDivisor)/Math.exp(BASE_TIME);
+    // console.log(ratio,Math.exp(BASE_TIME/divisor));
+    return ratio;
 }
 
 
