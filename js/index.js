@@ -81,7 +81,6 @@ function update() {
     //is the player trying to jump?
     if (checkstring(pressString) && player.body.onFloor() && game.time.now > jumpTimer) {
         playerJump();
-        jump = false;
     }
 
     //walking animation
@@ -172,12 +171,15 @@ function playerShift() {
 }
 
 function collisionHandler (obj1, obj2) {
-    game.stage.backgroundColor = '#992d2d';
+    game.stage.backgroundColor = 'red';
     console.log('BOOM')
 
     //for now we destroy the obstacle and send another
     removeObstacle(curId);
-    renderObstacle();
+    curId = 0;
+    player.x = 150
+    player.y = 320
+    //renderObstacle();
 }
 
 /*****************************************************************
