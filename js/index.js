@@ -163,6 +163,10 @@ function update() {
 
     game.physics.arcade.collide(player, platforms);
 
+    if (player.body.x >= 770) {
+        player.body.x = 770;
+    }
+
 }
 //add all keys pressed to string
 function key(keycode) {
