@@ -24,7 +24,7 @@ var runTimer = 0;
 var frameTimer = 0;
 var cursors;
 var BASE_TIME = 2.2;
-var timeDivisor = 100000;
+var timeDivisor = 1000000;
 
 //for movement aside from keyboard input
 var leftKey;
@@ -41,16 +41,11 @@ var curId = -1;
 
 var currentPlatforms = [];
 var platformId = -1;
+var pdelId = 0;
+
 var currtext = []
 var grizstyle = { font: "32px Arial", fill: "white", boundsAlignH: "top",boundsAlignV:"top", align: "center", backgroundColor: "transparent" };
-// var style = {
-//         font: "20px Arial", 
-//         fill: "#fff",
-//         align:"left",
-//         boundsAlignH: "top",
-//         boundsAlignV:"top",
-//         cursor: "pointer"
-//     };
+
 
 //string of all keys pressed, dont touch or rename collin!!
 var keystring = "";
@@ -120,10 +115,10 @@ function update() {
     if (spaceKey.isDown)
         handleMenu()
 
+
     //is the player trying to jump?
-    if (checkstring(pressString) && player.body.velocity.y == 0 && game.time.now > jumpTimer) {
+    if (checkstring(pressString) && (game.time.now > jumpTimer)) {
         playerJump();
-        jump = false;
     }
 
     //walking animation
@@ -143,8 +138,11 @@ function update() {
     }
 
     //platform hitting wall?
-    if (currentPlatforms[platformId].x > 800) {
-        removePlatform(platformId);
+    var random = Math.random()
+
+    if (currentPlatforms[pdelId].x > 800) {
+        removePlatform(pdelId);
+        pdelId++;
         renderPlatform();
     }
 
@@ -160,8 +158,9 @@ function update() {
     //makes world look like its moving
     bg.tilePosition.x -= changeBackgroundVelocity(shift);
 
-
-    game.physics.arcade.collide(player, platforms);
+    // game.physics.arcade.collide(player, platforms);
+    for (var i = pdelId; i <= platformId; i++)
+        game.physics.arcade.collide(player, currentPlatforms[i]);
 
     if (player.body.x >= 770) {
         player.body.x = 770;
@@ -215,7 +214,7 @@ function randomStr(siz = 4) {
 //make the player jump
 function playerJump() {
     player.frame = 6
-    player.body.velocity.y = -750;
+    player.body.velocity.y = -750
     jumpTimer = game.time.now + 750;
 }
 
@@ -256,6 +255,7 @@ function renderPlatform() {
     platforms.physicsBodyType = Phaser.Physics.ARCADE;
     var amount = Math.random() * 125;
     var p = platforms.create(10, 400+amount, 'platform');
+    
     game.physics.enable(p, Phaser.Physics.ARCADE);
     p.body.allowGravity = false;
     p.body.immovable = true;
@@ -422,9 +422,9 @@ function handleMenu(onStart) {
     menu_button.visible = false;
 
     var style = {
-        font: "20px Arial", 
-        fill: "#fff",
-        align:"left",
+        font: "24px Arial",
+        fill: "#ffffff",
+        align: "left",
         boundsAlignH: "top",
         boundsAlignV:"top",
         cursor: "pointer"
@@ -437,19 +437,19 @@ function handleMenu(onStart) {
     var yIncrement = 50;
 
     // Add start button and instruction text
-    start_button = game.add.text(350, 200, onStart ? 'start' : 'restart', style);
-    instruction_text = game.add.text(350, 200, text, style);
+    start_button = game.add.text(xCord, yCord, onStart ? 'start' : 'restart', style);
+    instruction_text = game.add.text(xCord - 150, yCord, text, style);
 
-    
-    
+    // Add resume button if not start screan    
     if (!onStart) {
-        resume_button = game.add.text(350, yCord += yIncrement, 'resume', style);
+        resume_button = game.add.text(xCord, yCord += yIncrement, 'resume', style);
         resume_button.inputEnabled = true;
         resume_button.events.onInputDown.add(resume, this);
     }
 
-    instruction_button = game.add.text(350, yCord +=yIncrement, 'instructions', style);
-    back_button = game.add.text(350, onStart ? yCord += (50 + yIncrement) : yCord += yIncrement, 'back', style);
+    // add instruction and back button
+    instruction_button = game.add.text(xCord, yCord +=yIncrement, 'instructions', style);
+    back_button = game.add.text(xCord - 150, onStart ? yCord += (50 + yIncrement) : yCord += yIncrement, 'back', style);
 
 
     start_button.inputEnabled = true;
