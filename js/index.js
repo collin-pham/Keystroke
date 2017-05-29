@@ -36,9 +36,11 @@ var bg;                         // background variable
 var pressString = "JUMP";
 
 var obstacles = [];
-var currentObstacles = []
-
+var currentObstacles = [];
 var curId = -1;
+
+var currentPlatforms = [];
+var platformId = -1;
 
 //string of all keys pressed, dont touch or rename collin!!
 var keystring = "";
@@ -71,19 +73,14 @@ function create() {
     initObstacles()
     renderObstacle();
 
+    renderPlatform();
+
     // define pause button
     menu_button = game.add.button(750, 10, 'button', handleMenu, this, 2, 1, 0);
     menu_button.scale.setTo(.1, .1);
 
     //platforms
-    platforms = game.add.group();
-    platforms.physicsBodyType = Phaser.Physics.ARCADE;
-    var p = platforms.create(10, 450, 'platform');
-    game.physics.enable(p, Phaser.Physics.ARCADE);
-    p.body.allowGravity = false;
-    p.body.immovable = true;
-    p.body.velocity.x = 10;
-    p.body.velocity.y = 0;
+    
 
 
     // cursors = game.input.keyboard.createCursorKeys();
@@ -132,6 +129,12 @@ function update() {
         removeObstacle(curId);
         renderObstacle();
         pressString = randomStr(caculateJumpStringLength());
+    }
+
+    //platform hitting wall?
+    if (currentPlatforms[platformId].x > 800) {
+        removePlatform(platformId);
+        renderPlatform();
     }
 
     //arrow key handlers
@@ -194,11 +197,6 @@ function randomStr(siz = 4) {
     return str;
 }
 
-//mark an obstacle for destroy
-function removeObstacle(id) {
-    currentObstacles[id].obstacle.pendingDestroy = true;
-}
-
 //make the player jump
 function playerJump() {
     player.frame = 6
@@ -233,6 +231,27 @@ function collisionHandler (obj1, obj2) {
     // player.x = 150
     // player.y = 320
     
+}
+/*****************************************************************
+Platform Code
+
+******************************************************************/
+function renderPlatform() {
+    platforms = game.add.group();
+    platforms.physicsBodyType = Phaser.Physics.ARCADE;
+    var amount = Math.random() * 300;
+    var p = platforms.create(10, 300+amount, 'platform');
+    game.physics.enable(p, Phaser.Physics.ARCADE);
+    p.body.allowGravity = false;
+    p.body.immovable = true;
+    p.body.velocity.x = 50;
+    p.body.velocity.y = 0;
+    currentPlatforms.push(p);
+    platformId++;
+}
+//mark an obstacle for destroy
+function removePlatform(id) {
+    currentPlatforms[id].pendingDestroy = true;
 }
 
 /*****************************************************************
@@ -284,6 +303,11 @@ function initObstacles() {
         crab
     ]
     
+}
+
+//mark an obstacle for destroy
+function removeObstacle(id) {
+    currentObstacles[id].obstacle.pendingDestroy = true;
 }
 
 // render new obstacle objects based on random Id.
