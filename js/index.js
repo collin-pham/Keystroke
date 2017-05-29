@@ -23,7 +23,7 @@ var jumpTimer = 0;
 var runTimer = 0;
 var frameTimer = 0;
 var cursors;
-var BASE_TIME = 2.2;
+var BASE_TIME = 1;
 var timeDivisor = 1000000;
 
 //for movement aside from keyboard input
@@ -143,6 +143,9 @@ function update() {
     if (currentPlatforms[pdelId].x > 800) {
         removePlatform(pdelId);
         pdelId++;
+        renderPlatform();
+    }
+    if (platformId - pdelId + 1 < caculateJumpStringLength()) {
         renderPlatform();
     }
 
