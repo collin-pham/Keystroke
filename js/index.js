@@ -255,12 +255,12 @@ function renderPlatform() {
     game.physics.enable(p, Phaser.Physics.ARCADE);
     p.body.allowGravity = false;
     p.body.immovable = true;
-    p.body.velocity.x = 50;
+    p.body.velocity.x = changePlatformVelocity()*500 + 50;
     p.body.velocity.y = 0;
     currentPlatforms.push(p);
     platformId++;
 }
-//mark an obstacle for destroy
+//mark an platform for destroy
 function removePlatform(id) {
     currentPlatforms[id].pendingDestroy = true;
 }
@@ -304,7 +304,7 @@ function initObstacles() {
         maxVelocity: 1000,
         name: 'fireball',
         width: 100,
-        onGround: true,
+        onGround: false,
         shiftFreq: 50,
         shift: false
     }
@@ -345,8 +345,12 @@ class obstacle {
 	constructor(id) {
         var obstacle = obstacles[Math.floor(Math.random()*3)];
 		this.id = id;
-
-		this.obstacle = game.add.sprite(900, 600, obstacle.name);
+        var height = 600;
+        if (!obstacle.onGround) {
+            var heightAdd = Math.random() * 150;
+            height = 450;
+        }
+		this.obstacle = game.add.sprite(900, height, obstacle.name);
         this.obstacle.frame = obstacle.frame;
         this.obstacle.width = obstacle.width;
         this.obstacle.height = obstacle.height;
@@ -368,7 +372,9 @@ Difficulty Code
 ******************************************************************/
 
 function changeObstacleVelocity(obstacle) {
-    return calculateRatio()*(obstacle.maxVelocity-obstacle.baseVelocity)+obstacle.baseVelocity;
+    // return calculateRatio()*(obstacle.maxVelocity-obstacle.baseVelocity)+obstacle.baseVelocity;    
+    return calculateLinear()*(obstacle.maxVelocity-obstacle.baseVelocity)+obstacle.baseVelocity;
+
 }
 
 function changeBackgroundVelocity(num) {
@@ -376,15 +382,23 @@ function changeBackgroundVelocity(num) {
 }
 
 function changePlatformVelocity() {
-
+    // return calculateRatio();    
+    return calculateLinear();
 }
 
 function caculateJumpStringLength() {
-    return Math.floor(calculateRatio()*10);
+    // return Math.floor(calculateRatio()*10);
+    return Math.floor(calculateLinear()*10) > 0 ? Math.floor(calculateLinear()*10) : 1;
+
 }
 
 function calculateRatio() {
     var ratio = Math.exp(game.time.now/timeDivisor)/Math.exp(BASE_TIME);
+    return ratio;
+}
+
+function calculateLinear() {
+    var ratio = game.time.now/(timeDivisor*BASE_TIME);
     return ratio;
 }
 
