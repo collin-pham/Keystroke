@@ -361,14 +361,28 @@ function handleMenu(onStart) {
     };
     var text = `Welcome to Keystroke! \nAvoid the obstacles to survive. \nJump by button mashing the correct keys. \nGood luck!`
         
+    // Location of text
+    var xCord = 350;
+    var yCord = 200;
+    var yIncrement = 50;
+
+    // Add start button and instruction text
     start_button = game.add.text(350, 200, onStart ? 'start' : 'restart', style);
-    resume_button = game.add.text(350, 250, 'resume', style);
-    instruction_button = game.add.text(350, 300, 'instructions', style);
-    back_button = game.add.text(350, 350, 'back', style);
     instruction_text = game.add.text(350, 200, text, style);
 
+    
+    
+    if (!onStart) {
+        resume_button = game.add.text(350, yCord += yIncrement, 'resume', style);
+        resume_button.inputEnabled = true;
+        resume_button.events.onInputDown.add(resume, this);
+    }
+
+    instruction_button = game.add.text(350, yCord +=yIncrement, 'instructions', style);
+    back_button = game.add.text(350, onStart ? yCord += (50 + yIncrement) : yCord += yIncrement, 'back', style);
+
+
     start_button.inputEnabled = true;
-    resume_button.inputEnabled = true;
     instruction_button.inputEnabled = true;
     back_button.inputEnabled = true;
 
@@ -376,7 +390,6 @@ function handleMenu(onStart) {
     instruction_text.visible = false;
 
     start_button.events.onInputDown.add(start, this);
-    resume_button.events.onInputDown.add(resume, this);
     instruction_button.events.onInputDown.add(instruction, this);
     back_button.events.onInputDown.add(toggleButtons, this);
 
@@ -397,15 +410,17 @@ function handleMenu(onStart) {
     function unpause() {
         game.paused = !game.paused;
         start_button.destroy();
-        resume_button.destroy();
         instruction_button.destroy();
+
+        !onStart ? resume_button.destroy() : null;
     }
     function toggleButtons() {
         start_button.visible = !start_button.visible;
-        resume_button.visible = !resume_button.visible;
         instruction_button.visible = !instruction_button.visible;
         back_button.visible = !back_button.visible;
         instruction_text.visible = !instruction_text.visible;
+
+        !onStart ? resume_button.visible = !resume_button.visible : null;
     }
 
 
