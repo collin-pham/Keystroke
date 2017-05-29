@@ -371,7 +371,6 @@ class obstacle {
             height = 300 + heightAdd;
             allowGravity = false;
         }
-        console.log(height);
 		this.obstacle = game.add.sprite(900, height, obstacle.name);
         this.obstacle.frame = obstacle.frame;
         this.obstacle.width = obstacle.width;
