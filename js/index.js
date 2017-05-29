@@ -111,7 +111,7 @@ function update() {
         handleMenu()
 
     //is the player trying to jump?
-    if (checkstring(pressString) && player.body.onFloor() && game.time.now > jumpTimer) {
+    if (checkstring(pressString) && player.body.velocity.y == 0 && game.time.now > jumpTimer) {
         playerJump();
         jump = false;
     }
@@ -239,8 +239,8 @@ Platform Code
 function renderPlatform() {
     platforms = game.add.group();
     platforms.physicsBodyType = Phaser.Physics.ARCADE;
-    var amount = Math.random() * 300;
-    var p = platforms.create(10, 300+amount, 'platform');
+    var amount = Math.random() * 125;
+    var p = platforms.create(10, 400+amount, 'platform');
     game.physics.enable(p, Phaser.Physics.ARCADE);
     p.body.allowGravity = false;
     p.body.immovable = true;
@@ -320,11 +320,14 @@ function renderObstacle() {
 class obstacle {
 	constructor(id) {
         var obstacle = obstacles[Math.floor(Math.random()*3)];
+        // var obstacle = obstacles[1];
 		this.id = id;
         var height = 600;
+        var allowGravity = true;
         if (!obstacle.onGround) {
-            var heightAdd = Math.random() * 150;
-            height = 450;
+            var heightAdd = Math.random() * 100;
+            height = 500;
+            allowGravity = false;
         }
 		this.obstacle = game.add.sprite(900, height, obstacle.name);
         this.obstacle.frame = obstacle.frame;
@@ -338,6 +341,7 @@ class obstacle {
         
     	this.obstacle.body.velocity.x = -.66 * changeObstacleVelocity(obstacle);
     	this.obstacle.body.collideWorldBounds = true;
+        this.obstacle.body.allowGravity = allowGravity;
         this.obstacle.immovable = true;
 	}
 }
