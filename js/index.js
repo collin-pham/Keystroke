@@ -115,15 +115,24 @@ function update() {
     if (spaceKey.isDown)
         handleMenu()
 
+    game.physics.arcade.collide(player, platforms);
+    // for (var i = pdelId; i <= platformId; i++)
+    //     game.physics.arcade.collide(player, currentPlatforms[i]);
 
     //is the player trying to jump?
-    if (checkstring(pressString) && (game.time.now > jumpTimer)) {
+    if (checkstring(pressString) && player.body.newVelocity.y > 0 && player.body.newVelocity.y < 0.362 && (game.time.now > jumpTimer)) {
         playerJump();
     }
 
     //walking animation
-    if (player.body.onFloor() && game.time.now > runTimer) {
-        playerShift();
+    if (player.body.newVelocity.x > 0 && game.time.now > runTimer) {
+        walkForwards()
+        
+    }else if (player.body.newVelocity.x < 0 && game.time.now > runTimer) {
+        walkBackwards()
+        
+    } else if (player.body.newVelocity.x == 0 && game.time.now > runTimer) {
+        player.frame = 4;
     }
     if (game.time.now > frameTimer) {
         animate();
@@ -158,9 +167,7 @@ function update() {
     //makes world look like its moving
     bg.tilePosition.x -= changeBackgroundVelocity(shift);
 
-    // game.physics.arcade.collide(player, platforms);
-    for (var i = pdelId; i <= platformId; i++)
-        game.physics.arcade.collide(player, currentPlatforms[i]);
+    
 
 }
 //add all keys pressed to string
@@ -209,15 +216,19 @@ function randomStr(siz = 4) {
 
 //make the player jump
 function playerJump() {
-    player.frame = 6
-    player.body.velocity.y = -750
+    player.frame = 6;
+    player.body.velocity.y = -750;
     jumpTimer = game.time.now + 750;
 }
 
-//adjust the frame of the sprite
-function playerShift() {
+
+function walkForwards() {
     runTimer = game.time.now + 250;
     player.frame = player.frame % 4 + 5
+}
+function walkBackwards() {
+    runTimer = game.time.now + 250;
+    player.frame = (player.frame + 1) % 4
 }
 
 //checks the obstacle to see if it should increment the frame and by how much
