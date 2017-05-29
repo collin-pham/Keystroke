@@ -36,9 +36,21 @@ var bg;                         // background variable
 var pressString = "JUMP";
 
 var obstacles = [];
-var currentObstacles = []
-
+var currentObstacles = [];
 var curId = -1;
+
+var currentPlatforms = [];
+var platformId = -1;
+var currtext = []
+var grizstyle = { font: "32px Arial", fill: "white", boundsAlignH: "top",boundsAlignV:"top", align: "center", backgroundColor: "transparent" };
+// var style = {
+//         font: "20px Arial", 
+//         fill: "#fff",
+//         align:"left",
+//         boundsAlignH: "top",
+//         boundsAlignV:"top",
+//         cursor: "pointer"
+//     };
 
 //string of all keys pressed, dont touch or rename collin!!
 var keystring = "";
@@ -71,20 +83,15 @@ function create() {
     initObstacles()
     renderObstacle();
 
+    renderPlatform();
+    //renderText("test");
+
     // define pause button
     menu_button = game.add.button(750, 10, 'button', handleMenu, this, 2, 1, 0);
     menu_button.scale.setTo(.1, .1);
 
     //platforms
-    platforms = game.add.group();
-    platforms.physicsBodyType = Phaser.Physics.ARCADE;
-    var p = platforms.create(10, 450, 'platform');
-    game.physics.enable(p, Phaser.Physics.ARCADE);
-    p.body.allowGravity = false;
-    p.body.immovable = true;
-    p.body.velocity.x = 10;
-    p.body.velocity.y = 0;
-
+    
 
     // cursors = game.input.keyboard.createCursorKeys();
 
@@ -114,7 +121,7 @@ function update() {
         handleMenu()
 
     //is the player trying to jump?
-    if (checkstring(pressString) && player.body.onFloor() && game.time.now > jumpTimer) {
+    if (checkstring(pressString) && player.body.velocity.y == 0 && game.time.now > jumpTimer) {
         playerJump();
         jump = false;
     }
@@ -132,6 +139,13 @@ function update() {
         removeObstacle(curId);
         renderObstacle();
         pressString = randomStr(caculateJumpStringLength());
+        renderText(pressString);
+    }
+
+    //platform hitting wall?
+    if (currentPlatforms[platformId].x > 800) {
+        removePlatform(platformId);
+        renderPlatform();
     }
 
     //arrow key handlers
@@ -194,11 +208,6 @@ function randomStr(siz = 4) {
     return str;
 }
 
-//mark an obstacle for destroy
-function removeObstacle(id) {
-    currentObstacles[id].obstacle.pendingDestroy = true;
-}
-
 //make the player jump
 function playerJump() {
     player.frame = 6
@@ -234,6 +243,40 @@ function collisionHandler (obj1, obj2) {
     // player.y = 320
     
 }
+/*****************************************************************
+Platform Code
+
+******************************************************************/
+function renderPlatform() {
+    platforms = game.add.group();
+    platforms.physicsBodyType = Phaser.Physics.ARCADE;
+    var amount = Math.random() * 125;
+    var p = platforms.create(10, 400+amount, 'platform');
+    game.physics.enable(p, Phaser.Physics.ARCADE);
+    p.body.allowGravity = false;
+    p.body.immovable = true;
+    p.body.velocity.x = changePlatformVelocity()*500 + 50;
+    p.body.velocity.y = 0;
+    currentPlatforms.push(p);
+    platformId++;
+}
+//mark an platform for destroy
+function removePlatform(id) {
+    currentPlatforms[id].pendingDestroy = true;
+}
+
+function renderText(intext) {
+    currtext = game.add.group();
+    currtext.physicsBodyType = Phaser.Physics.ARCADE;
+    var y = Math.floor(Math.random() * 100) + 125;
+    var t = game.add.text(0,y,String(intext),grizstyle)
+    game.physics.enable(t, Phaser.Physics.ARCADE);
+    t.body.allowGravity = false;
+    t.body.immovable = true;
+    t.body.velocity.x = 50;
+    t.body.velocity.y = 0;
+
+}
 
 /*****************************************************************
 Obstacle Code
@@ -261,7 +304,7 @@ function initObstacles() {
         maxVelocity: 1000,
         name: 'fireball',
         width: 100,
-        onGround: true,
+        onGround: false,
         shiftFreq: 50,
         shift: false
     }
@@ -286,6 +329,11 @@ function initObstacles() {
     
 }
 
+//mark an obstacle for destroy
+function removeObstacle(id) {
+    currentObstacles[id].obstacle.pendingDestroy = true;
+}
+
 // render new obstacle objects based on random Id.
 function renderObstacle() {
     curId++;
@@ -296,9 +344,16 @@ function renderObstacle() {
 class obstacle {
 	constructor(id) {
         var obstacle = obstacles[Math.floor(Math.random()*3)];
+        // var obstacle = obstacles[1];
 		this.id = id;
-
-		this.obstacle = game.add.sprite(900, 600, obstacle.name);
+        var height = 600;
+        var allowGravity = true;
+        if (!obstacle.onGround) {
+            var heightAdd = Math.random() * 100;
+            height = 500;
+            allowGravity = false;
+        }
+		this.obstacle = game.add.sprite(900, height, obstacle.name);
         this.obstacle.frame = obstacle.frame;
         this.obstacle.width = obstacle.width;
         this.obstacle.height = obstacle.height;
@@ -310,6 +365,7 @@ class obstacle {
         
     	this.obstacle.body.velocity.x = -.66 * changeObstacleVelocity(obstacle);
     	this.obstacle.body.collideWorldBounds = true;
+        this.obstacle.body.allowGravity = allowGravity;
         this.obstacle.immovable = true;
 	}
 }
@@ -320,7 +376,9 @@ Difficulty Code
 ******************************************************************/
 
 function changeObstacleVelocity(obstacle) {
-    return calculateRatio()*(obstacle.maxVelocity-obstacle.baseVelocity)+obstacle.baseVelocity;
+    // return calculateRatio()*(obstacle.maxVelocity-obstacle.baseVelocity)+obstacle.baseVelocity;    
+    return calculateLinear()*(obstacle.maxVelocity-obstacle.baseVelocity)+obstacle.baseVelocity;
+
 }
 
 function changeBackgroundVelocity(num) {
@@ -328,15 +386,23 @@ function changeBackgroundVelocity(num) {
 }
 
 function changePlatformVelocity() {
-
+    // return calculateRatio();    
+    return calculateLinear();
 }
 
 function caculateJumpStringLength() {
-    return Math.floor(calculateRatio()*10);
+    // return Math.floor(calculateRatio()*10);
+    return Math.floor(calculateLinear()*10) > 0 ? Math.floor(calculateLinear()*10) : 1;
+
 }
 
 function calculateRatio() {
     var ratio = Math.exp(game.time.now/timeDivisor)/Math.exp(BASE_TIME);
+    return ratio;
+}
+
+function calculateLinear() {
+    var ratio = game.time.now/(timeDivisor*BASE_TIME);
     return ratio;
 }
 
