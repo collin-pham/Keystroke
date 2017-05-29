@@ -23,7 +23,7 @@ var jumpTimer = 0;
 var runTimer = 0;
 var frameTimer = 0;
 var cursors;
-var BASE_TIME = 1;
+var BASE_TIME = .5;
 var timeDivisor = 1000000;
 
 //for movement aside from keyboard input
@@ -103,6 +103,7 @@ function create() {
 }
 
 function update() {
+    
     var shift = 3;
 
     //so player doesn't slide around
@@ -115,9 +116,9 @@ function update() {
     if (spaceKey.isDown)
         handleMenu()
 
-    game.physics.arcade.collide(player, platforms);
-    // for (var i = pdelId; i <= platformId; i++)
-    //     game.physics.arcade.collide(player, currentPlatforms[i]);
+    // game.physics.arcade.collide(player, platforms);
+    for (var i = pdelId; i <= platformId; i++)
+        game.physics.arcade.collide(player, currentPlatforms[i]);
 
     //is the player trying to jump?
     if (checkstring(pressString) && player.body.newVelocity.y > 0 && player.body.newVelocity.y < 0.362 && (game.time.now > jumpTimer)) {
@@ -231,11 +232,18 @@ function playerJump() {
 
 function walkForwards() {
     runTimer = game.time.now + 250;
-    player.frame = player.frame % 4 + 5
+    if (player.body.velocity.y == 0)
+        player.frame = player.frame % 4 + 5;
+    else 
+        player.frame = 6;
+    
 }
 function walkBackwards() {
     runTimer = game.time.now + 250;
-    player.frame = (player.frame + 1) % 4
+    if (player.body.velocity.y == 0)
+        player.frame = (player.frame + 1) % 4;
+    else 
+        player.frame = 1;
 }
 
 //checks the obstacle to see if it should increment the frame and by how much
@@ -431,6 +439,7 @@ Menu Code
 
 function handleMenu(onStart) {
     onStart = typeof onStart == 'boolean' ? true : false;
+    var pauseTime = game.time.now;
     // pause the game
     game.paused = !game.paused;
     menu_button.visible = false;
@@ -493,6 +502,7 @@ function handleMenu(onStart) {
 
     function unpause() {
         game.paused = !game.paused;
+
         start_button.destroy();
         instruction_button.destroy();
 
