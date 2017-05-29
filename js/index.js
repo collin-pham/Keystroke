@@ -361,16 +361,17 @@ function renderObstacle() {
 // abstract class to hold different types of obstacles
 class obstacle {
 	constructor(id) {
-        var obstacle = obstacles[Math.floor(Math.random()*3)];
-        // var obstacle = obstacles[1];
+        // var obstacle = obstacles[Math.floor(Math.random()*3)];
+        var obstacle = obstacles[1];
 		this.id = id;
         var height = 600;
         var allowGravity = true;
         if (!obstacle.onGround) {
-            var heightAdd = Math.random() * 100;
-            height = 500;
+            var heightAdd = Math.random() * 200;
+            height = 300 + heightAdd;
             allowGravity = false;
         }
+        console.log(height);
 		this.obstacle = game.add.sprite(900, height, obstacle.name);
         this.obstacle.frame = obstacle.frame;
         this.obstacle.width = obstacle.width;
