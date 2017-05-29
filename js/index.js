@@ -23,7 +23,7 @@ var jumpTimer = 0;
 var runTimer = 0;
 var frameTimer = 0;
 var cursors;
-var BASE_TIME = 2.2;
+var BASE_TIME = 1;
 var timeDivisor = 1000000;
 
 //for movement aside from keyboard input
@@ -154,6 +154,9 @@ function update() {
         pdelId++;
         renderPlatform();
     }
+    if (platformId - pdelId + 1 < caculateJumpStringLength()) {
+        renderPlatform();
+    }
 
     //arrow key handlers
     if (leftKey.isDown) {
@@ -168,6 +171,10 @@ function update() {
     bg.tilePosition.x -= changeBackgroundVelocity(shift);
 
     
+
+    if (player.body.x >= 770) {
+        player.body.x = 770;
+    }
 
 }
 //add all keys pressed to string
