@@ -24,7 +24,7 @@ var runTimer = 0;
 var frameTimer = 0;
 var cursors;
 var BASE_TIME = 2.2;
-var timeDivisor = 100000;
+var timeDivisor = 1000000;
 
 //for movement aside from keyboard input
 var leftKey;
@@ -41,6 +41,8 @@ var curId = -1;
 
 var currentPlatforms = [];
 var platformId = -1;
+var pdelId = 0;
+
 var currtext = []
 var grizstyle = { font: "32px Arial", fill: "white", boundsAlignH: "top",boundsAlignV:"top", align: "center", backgroundColor: "transparent" };
 // var style = {
@@ -143,8 +145,11 @@ function update() {
     }
 
     //platform hitting wall?
-    if (currentPlatforms[platformId].x > 800) {
-        removePlatform(platformId);
+    var random = Math.random()
+
+    if (currentPlatforms[pdelId].x > 800) {
+        removePlatform(pdelId);
+        pdelId++;
         renderPlatform();
     }
 
@@ -160,8 +165,9 @@ function update() {
     //makes world look like its moving
     bg.tilePosition.x -= changeBackgroundVelocity(shift);
 
-
-    game.physics.arcade.collide(player, platforms);
+    // game.physics.arcade.collide(player, platforms);
+    for (var i = pdelId; i <= platformId; i++)
+        game.physics.arcade.collide(player, currentPlatforms[i]);
 
 }
 //add all keys pressed to string
