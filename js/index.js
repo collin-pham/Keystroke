@@ -41,6 +41,16 @@ var curId = -1;
 
 var currentPlatforms = [];
 var platformId = -1;
+var currtext = []
+var grizstyle = { font: "32px Arial", fill: "white", boundsAlignH: "top",boundsAlignV:"top", align: "center", backgroundColor: "transparent" };
+// var style = {
+//         font: "20px Arial", 
+//         fill: "#fff",
+//         align:"left",
+//         boundsAlignH: "top",
+//         boundsAlignV:"top",
+//         cursor: "pointer"
+//     };
 
 //string of all keys pressed, dont touch or rename collin!!
 var keystring = "";
@@ -74,6 +84,7 @@ function create() {
     renderObstacle();
 
     renderPlatform();
+    //renderText("test");
 
     // define pause button
     menu_button = game.add.button(750, 10, 'button', handleMenu, this, 2, 1, 0);
@@ -81,7 +92,6 @@ function create() {
 
     //platforms
     
-
 
     // cursors = game.input.keyboard.createCursorKeys();
 
@@ -129,6 +139,7 @@ function update() {
         removeObstacle(curId);
         renderObstacle();
         pressString = randomStr(caculateJumpStringLength());
+        renderText(pressString);
     }
 
     //platform hitting wall?
@@ -252,6 +263,19 @@ function renderPlatform() {
 //mark an platform for destroy
 function removePlatform(id) {
     currentPlatforms[id].pendingDestroy = true;
+}
+
+function renderText(intext) {
+    currtext = game.add.group();
+    currtext.physicsBodyType = Phaser.Physics.ARCADE;
+    var y = Math.floor(Math.random() * 100) + 125;
+    var t = game.add.text(0,y,String(intext),grizstyle)
+    game.physics.enable(t, Phaser.Physics.ARCADE);
+    t.body.allowGravity = false;
+    t.body.immovable = true;
+    t.body.velocity.x = 50;
+    t.body.velocity.y = 0;
+
 }
 
 /*****************************************************************
