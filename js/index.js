@@ -291,9 +291,11 @@ function renderPlatform() {
     game.physics.enable(p, Phaser.Physics.ARCADE);
     p.body.allowGravity = false;
     p.body.immovable = true;
-    p.body.velocity.x = changePlatformVelocity()*500 + 50;
+    p.body.velocity.x = changePlatformVelocity()*200 + 50;
     p.body.velocity.y = 0;
     p.body.checkCollision.down = false;
+    p.body.checkCollision.left = false;
+    p.body.checkCollision.right = false;
     currentPlatforms.push(p);
     platformId++;
 }
