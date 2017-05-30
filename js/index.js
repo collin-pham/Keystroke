@@ -8,12 +8,12 @@ function preload() {
 
     game.load.spritesheet('button', 'assets/pause.png', 321, 311);
 
-    game.load.spritesheet('mushroom', 'assets/mushroom.png');
-
     game.load.spritesheet('platform', 'assets/LargePlatform.png', 130, 50);
 
     game.load.spritesheet('fireball', 'assets/fireball.png', 52, 42);
     game.load.spritesheet('crab', 'assets/crab.png', 131, 129);
+    game.load.spritesheet('raindrop', 'assets/raindrop.png', 290, 399);
+    game.load.spritesheet('mushroom', 'assets/mushroom.png');
 
 }
 // define initial parameters
@@ -145,14 +145,23 @@ function update() {
     }
 
     //obstacle hitting wall?
-    if (currentObstacles[curId].obstacle.x < 10) {
+    if (currentObstacles[curId].obstacle.x < 10 ){
         successfulObs++;
         removeObstacle(curId);
         renderObstacle();
         pressString = randomStr(caculateJumpStringLength());
         renderText(pressString);
         score += 200;
-    }
+    } 
+    if (currentObstacles[curId].obstacle.y == 549 ){  
+        successfulObs++;
+        removeObstacle(curId);
+        renderObstacle();
+        pressString = randomStr(caculateJumpStringLength());
+        renderText(pressString);
+        score += 200;
+        console.log('raindrop?')
+    } 
 
     //platform hitting wall?
     var random = Math.random()
@@ -293,9 +302,13 @@ function renderPlatform() {
     p.body.immovable = true;
     p.body.velocity.x = changePlatformVelocity()*200 + 50;
     p.body.velocity.y = 0;
+
+    // Disable collisions from down, left and right directions
     p.body.checkCollision.down = false;
     p.body.checkCollision.left = false;
     p.body.checkCollision.right = false;
+
+    // add platforms
     currentPlatforms.push(p);
     platformId++;
 }
@@ -333,7 +346,8 @@ function initObstacles() {
         width: 50,
         onGround: true,
         shiftFreq: 50,
-        shift: false
+        shift: false,
+        yVelocity: false
     }
     const fireball = {
         action: 'jump',
@@ -345,7 +359,8 @@ function initObstacles() {
         width: 100,
         onGround: false,
         shiftFreq: 50,
-        shift: false
+        shift: false,
+        yVelocity: false
     }
     const crab = {
         action: 'jump',
@@ -357,13 +372,28 @@ function initObstacles() {
         width: 80,
         onGround: true,
         shiftFreq: 50,
-        shift: true
+        shift: true,
+        yVelocity: false
+    }
+    const raindrop = {
+        action: 'jump',
+        baseVelocity: 100,
+        frame: 0,
+        height: 51,
+        maxVelocity: 1000,
+        name: 'raindrop',
+        width: 51,
+        onGround: false,
+        shiftFreq: 50,
+        shift: false,
+        yVelocity: true
     }
 
     obstacles = [
         mushroom, 
         fireball,
-        crab
+        crab,
+        raindrop
     ]
     
 }
@@ -382,7 +412,9 @@ function renderObstacle() {
 // abstract class to hold different types of obstacles
 class obstacle {
 	constructor(id) {
-        var obstacle = obstacles[Math.floor(Math.random()*3)];
+        var num = Math.floor(Math.random()*obstacles.length)
+        console.log(num)
+        var obstacle = obstacles[num];
         // var obstacle = obstacles[1];
 		this.id = id;
         var height = 600;
@@ -393,17 +425,30 @@ class obstacle {
             allowGravity = false;
             height = player.y;
         }
-		this.obstacle = game.add.sprite(900, height, obstacle.name);
+		
+        
+        if (obstacle.yVelocity) {
+            this.obstacle = game.add.sprite(800*Math.random(), 0, obstacle.name);
+            game.physics.enable(this.obstacle, Phaser.Physics.ARCADE);
+            this.obstacle.body.velocity.y = .66 * changeObstacleVelocity(obstacle);
+            this.obstacle.body.acceleration.y = 100;
+
+        } else {
+            this.obstacle = game.add.sprite(900, height, obstacle.name);
+            game.physics.enable(this.obstacle, Phaser.Physics.ARCADE);
+            this.obstacle.body.velocity.x = -.66 * changeObstacleVelocity(obstacle);
+           
+        }
         this.obstacle.frame = obstacle.frame;
         this.obstacle.width = obstacle.width;
         this.obstacle.height = obstacle.height;
     	this.obstacle.name = obstacle.name;
         this.shiftFreq = obstacle.shiftFreq;
         this.shift = obstacle.shift;
-   
-    	game.physics.enable(this.obstacle, Phaser.Physics.ARCADE);
-        
-    	this.obstacle.body.velocity.x = -.66 * changeObstacleVelocity(obstacle);
+        this.yVelocity = obstacle.yVelocity
+
+
+
     	this.obstacle.body.collideWorldBounds = true;
         this.obstacle.body.allowGravity = allowGravity;
         this.obstacle.immovable = true;
