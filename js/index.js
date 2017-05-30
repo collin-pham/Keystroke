@@ -24,7 +24,7 @@ var runTimer = 0;
 var frameTimer = 0;
 var cursors;
 
-var BASE_TIME = .5;
+var BASE_TIME = .6;
 var timeDivisor = 1000000;
 
 //for movement aside from keyboard input
@@ -47,6 +47,9 @@ var pdelId = 0;
 var platforms;
 var platformWaitCounter = 0;
 var platformTimer = -1;
+
+var text = [];
+var textId = -1;
 
 var currtext = []
 var grizstyle = { font: "32px Arial", fill: "white", boundsAlignH: "top",boundsAlignV:"top", align: "center", backgroundColor: "transparent" };
@@ -83,16 +86,10 @@ function create() {
     renderObstacle();
 
     renderPlatform();
-    //renderText("test");
 
     // define pause button
     menu_button = game.add.button(750, 10, 'button', handleMenu, this, 2, 1, 0);
     menu_button.scale.setTo(.1, .1);
-
-    //platforms
-    
-
-    // cursors = game.input.keyboard.createCursorKeys();
 
     //initialize arrow keys
     spaceKey = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
@@ -108,7 +105,7 @@ function create() {
 
 function update() {
     score += .1;
-    
+
     var shift = 3;
 
     //so player doesn't slide around
@@ -150,6 +147,7 @@ function update() {
         removeObstacle(curId);
         renderObstacle();
         pressString = randomStr(caculateJumpStringLength());
+        removeText(textId);
         renderText(pressString);
         score += 200;
     } 
@@ -281,11 +279,25 @@ function collisionHandler (obj1, obj2) {
 
     //for now we destroy the obstacle and send another
     removeObstacle(curId);
-    renderObstacle();
-    // curId = 0;
-    // player.x = 150
-    // player.y = 320
-    
+    removeText(textId);
+    game.time.reset();
+    score = 0;
+    player.body.x = 150;
+    player.body.y = 320;
+    successfulObs = 0;
+
+    for (var i = pdelId; i <= platformId; i++) {
+        removePlatform(i);
+    }
+
+    platformTimer = -1;
+
+    jumpTimer = 0;
+    runTimer = 0;
+    frameTimer = 0;
+    pressString = "JUMP";
+
+    handleMenu(true,true);
 }
 /*****************************************************************
 Platform Code
@@ -316,7 +328,10 @@ function renderPlatform() {
 function removePlatform(id) {
     currentPlatforms[id].pendingDestroy = true;
 }
+/*****************************************************************
+Text Code
 
+******************************************************************/
 function renderText(intext) {
     currtext = game.add.group();
     currtext.physicsBodyType = Phaser.Physics.ARCADE;
@@ -327,9 +342,13 @@ function renderText(intext) {
     t.body.immovable = true;
     t.body.velocity.x = 50;
     t.body.velocity.y = 0;
-
+    text.push(t);
+    textId++;
 }
-
+function removeText(id) {
+    if (id >= 0)
+        text[id].pendingDestroy = true;
+}
 /*****************************************************************
 Obstacle Code
 
@@ -507,8 +526,9 @@ Menu Code
 
 ******************************************************************/
 
-function handleMenu(onStart) {
+function handleMenu(onStart,restart) {
     onStart = typeof onStart == 'boolean' ? true : false;
+    restart = typeof restart == 'boolean' ? true : false;
     var pauseTime = game.time.now;
     // pause the game
     game.paused = !game.paused;
@@ -534,7 +554,7 @@ function handleMenu(onStart) {
     instruction_text = game.add.text(xCord - 150, yCord, text, style);
 
     // Add resume button if not start screan    
-    if (!onStart) {
+    if (!onStart && curId > 0) {
         resume_button = game.add.text(xCord, yCord += yIncrement, 'resume', style);
         resume_button.inputEnabled = true;
         resume_button.events.onInputDown.add(resume, this);
@@ -575,6 +595,12 @@ function handleMenu(onStart) {
 
         start_button.destroy();
         instruction_button.destroy();
+
+        if (restart) {
+            renderPlatform();
+            renderObstacle();
+            pdelId++;
+        }
 
         !onStart ? resume_button.destroy() : null;
     }
