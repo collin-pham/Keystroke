@@ -156,9 +156,9 @@ function update() {
         removeObstacle(curId);
         renderObstacle();
         pressString = randomStr(caculateJumpStringLength());
+        removeText(textId);
         renderText(pressString);
         score += 200;
-        console.log('raindrop?')
     } 
 
     //platform hitting wall?
@@ -432,7 +432,6 @@ function renderObstacle() {
 class obstacle {
 	constructor(id) {
         var num = Math.floor(Math.random()*obstacles.length)
-        console.log(num)
         var obstacle = obstacles[num];
         // var obstacle = obstacles[1];
 		this.id = id;
@@ -447,7 +446,7 @@ class obstacle {
 		
         
         if (obstacle.yVelocity) {
-            this.obstacle = game.add.sprite(800*Math.random(), 0, obstacle.name);
+            this.obstacle = game.add.sprite(750*Math.random(), 0, obstacle.name);
             game.physics.enable(this.obstacle, Phaser.Physics.ARCADE);
             this.obstacle.body.velocity.y = .66 * changeObstacleVelocity(obstacle);
             this.obstacle.body.acceleration.y = 100;
