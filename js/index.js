@@ -24,7 +24,7 @@ var runTimer = 0;
 var frameTimer = 0;
 var cursors;
 
-var BASE_TIME = .5;
+var BASE_TIME = .6;
 var timeDivisor = 1000000;
 
 //for movement aside from keyboard input
@@ -47,6 +47,9 @@ var pdelId = 0;
 var platforms;
 var platformWaitCounter = 0;
 var platformTimer = -1;
+
+var text = [];
+var textId = -1;
 
 var currtext = []
 var grizstyle = { font: "32px Arial", fill: "white", boundsAlignH: "top",boundsAlignV:"top", align: "center", backgroundColor: "transparent" };
@@ -150,6 +153,7 @@ function update() {
         removeObstacle(curId);
         renderObstacle();
         pressString = randomStr(caculateJumpStringLength());
+        removeText(textId);
         renderText(pressString);
         score += 200;
     }
@@ -303,7 +307,10 @@ function renderPlatform() {
 function removePlatform(id) {
     currentPlatforms[id].pendingDestroy = true;
 }
+/*****************************************************************
+Text Code
 
+******************************************************************/
 function renderText(intext) {
     currtext = game.add.group();
     currtext.physicsBodyType = Phaser.Physics.ARCADE;
@@ -314,9 +321,13 @@ function renderText(intext) {
     t.body.immovable = true;
     t.body.velocity.x = 50;
     t.body.velocity.y = 0;
-
+    text.push(t);
+    textId++;
 }
-
+function removeText(id) {
+    if (id >= 0)
+        text[id].pendingDestroy = true;
+}
 /*****************************************************************
 Obstacle Code
 
