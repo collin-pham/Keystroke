@@ -54,6 +54,7 @@ var grizstyle = { font: "32px Arial", fill: "white", boundsAlignH: "top",boundsA
 
 //string of all keys pressed, dont touch or rename collin!!
 var keystring = "";
+var score = 0;
 
 /////////////////////////// RIGHT NOW THE PLAYER CAN GO FURTHER RIGHT THAN WHERE OBSTACLES SPAWN. FIX AT SOME POINT BY LIMITING PLAYER /////////
 
@@ -106,6 +107,7 @@ function create() {
 }
 
 function update() {
+    score += .1;
     
     var shift = 3;
 
@@ -149,6 +151,7 @@ function update() {
         renderObstacle();
         pressString = randomStr(caculateJumpStringLength());
         renderText(pressString);
+        score += 200;
     }
 
     //platform hitting wall?
@@ -426,7 +429,18 @@ function changePlatformVelocity() {
 
 function caculateJumpStringLength() {
     // return Math.floor(calculateRatio()*10);
-    return Math.floor(calculateLinear()*10) > 0 ? Math.floor(calculateLinear()*10) : 1;
+    var length = 1;
+    var val = calculateLinear();
+    if (val > .1)
+        val++;
+    if (val > .25)
+        val++;
+    if (val > .5)
+        val++;
+    if (val > .85)
+        val++;
+    // return Math.floor(calculateLinear()*10) > 0 ? Math.floor(calculateLinear()*10) : 1;
+    return val;
 
 }
 
@@ -534,8 +548,10 @@ Restart Game
 ******************************************************************/
 
 function render () {
+    var sc = "Score Earned: "+parseInt(score).toString();
     var ob = "Obstacles Cleared: "+parseInt(successfulObs, 10).toString();
     var typ = "Type "+pressString+" To Jump!"
-    game.debug.text(ob, 32, 32);
-    game.debug.text(typ, 32, 64);
+    game.debug.text(sc, 32, 32);
+    game.debug.text(ob, 32, 64);
+    game.debug.text(typ, 32, 96);
 }
