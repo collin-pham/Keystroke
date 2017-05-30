@@ -54,6 +54,7 @@ var grizstyle = { font: "32px Arial", fill: "white", boundsAlignH: "top",boundsA
 
 //string of all keys pressed, dont touch or rename collin!!
 var keystring = "";
+var score = 0;
 
 /////////////////////////// RIGHT NOW THE PLAYER CAN GO FURTHER RIGHT THAN WHERE OBSTACLES SPAWN. FIX AT SOME POINT BY LIMITING PLAYER /////////
 
@@ -106,6 +107,7 @@ function create() {
 }
 
 function update() {
+    score += .1;
     
     // if (game.time.now < 15) {
     //     renderPlatform();
@@ -153,6 +155,7 @@ function update() {
         renderObstacle();
         pressString = randomStr(caculateJumpStringLength());
         renderText(pressString);
+        score += 200;
     }
 
     //platform hitting wall?
@@ -294,8 +297,11 @@ function renderPlatform() {
     game.physics.enable(p, Phaser.Physics.ARCADE);
     p.body.allowGravity = false;
     p.body.immovable = true;
-    p.body.velocity.x = changePlatformVelocity()*500 + 50;
+    p.body.velocity.x = changePlatformVelocity()*200 + 50;
     p.body.velocity.y = 0;
+    p.body.checkCollision.down = false;
+    p.body.checkCollision.left = false;
+    p.body.checkCollision.right = false;
     currentPlatforms.push(p);
     platformId++;
 }
@@ -432,7 +438,18 @@ function changePlatformVelocity() {
 
 function caculateJumpStringLength() {
     // return Math.floor(calculateRatio()*10);
-    return Math.floor(calculateLinear()*10) > 0 ? Math.floor(calculateLinear()*10) : 1;
+    var length = 1;
+    var val = calculateLinear();
+    if (val > .1)
+        length++;
+    if (val > .25)
+        length++;
+    if (val > .5)
+        length++;
+    if (val > .85)
+        length++;
+    // return Math.floor(calculateLinear()*10) > 0 ? Math.floor(calculateLinear()*10) : 1;
+    return length;
 
 }
 
@@ -547,8 +564,10 @@ Restart Game
 ******************************************************************/
 
 function render () {
+    var sc = "Score Earned: "+parseInt(score).toString();
     var ob = "Obstacles Cleared: "+parseInt(successfulObs, 10).toString();
     var typ = "Type "+pressString+" To Jump!"
-    game.debug.text(ob, 32, 32);
-    game.debug.text(typ, 32, 64);
+    game.debug.text(sc, 32, 32);
+    game.debug.text(ob, 32, 64);
+    game.debug.text(typ, 32, 96);
 }
