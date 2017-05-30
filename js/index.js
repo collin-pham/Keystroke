@@ -435,15 +435,15 @@ function caculateJumpStringLength() {
     var length = 1;
     var val = calculateLinear();
     if (val > .1)
-        val++;
+        length++;
     if (val > .25)
-        val++;
+        length++;
     if (val > .5)
-        val++;
+        length++;
     if (val > .85)
-        val++;
+        length++;
     // return Math.floor(calculateLinear()*10) > 0 ? Math.floor(calculateLinear()*10) : 1;
-    return val;
+    return length;
 
 }
 
