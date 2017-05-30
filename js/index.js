@@ -23,6 +23,7 @@ var jumpTimer = 0;
 var runTimer = 0;
 var frameTimer = 0;
 var cursors;
+
 var BASE_TIME = .5;
 var timeDivisor = 1000000;
 
@@ -38,10 +39,14 @@ var pressString = "JUMP";
 var obstacles = [];
 var currentObstacles = [];
 var curId = -1;
+var successfulObs = 0;
 
 var currentPlatforms = [];
 var platformId = -1;
 var pdelId = 0;
+var platforms;
+var platformWaitCounter = 0;
+var platformTimer = -1;
 
 var currtext = []
 var grizstyle = { font: "32px Arial", fill: "white", boundsAlignH: "top",boundsAlignV:"top", align: "center", backgroundColor: "transparent" };
@@ -49,8 +54,6 @@ var grizstyle = { font: "32px Arial", fill: "white", boundsAlignH: "top",boundsA
 
 //string of all keys pressed, dont touch or rename collin!!
 var keystring = "";
-
-var platforms;
 
 /////////////////////////// RIGHT NOW THE PLAYER CAN GO FURTHER RIGHT THAN WHERE OBSTACLES SPAWN. FIX AT SOME POINT BY LIMITING PLAYER /////////
 
@@ -141,6 +144,7 @@ function update() {
 
     //obstacle hitting wall?
     if (currentObstacles[curId].obstacle.x < 10) {
+        successfulObs++;
         removeObstacle(curId);
         renderObstacle();
         pressString = randomStr(caculateJumpStringLength());
@@ -153,9 +157,14 @@ function update() {
     if (currentPlatforms[pdelId].x > 800) {
         removePlatform(pdelId);
         pdelId++;
-        renderPlatform();
+        platformWaitCounter++;
     }
-    if (platformId - pdelId + 1 < caculateJumpStringLength()) {
+    if (platformId + platformWaitCounter - pdelId + 1 < caculateJumpStringLength()) {
+        platformWaitCounter++;
+    }
+    if (platformWaitCounter > 0 && game.time.now > platformTimer) {
+        platformWaitCounter--;
+        platformTimer = game.time.now + 1700;
         renderPlatform();
     }
 
@@ -170,8 +179,6 @@ function update() {
     }
     //makes world look like its moving
     bg.tilePosition.x -= changeBackgroundVelocity(shift);
-
-    
 
     if (player.body.x >= 770) {
         player.body.x = 770;
@@ -275,8 +282,8 @@ Platform Code
 function renderPlatform() {
     platforms = game.add.group();
     platforms.physicsBodyType = Phaser.Physics.ARCADE;
-    var amount = Math.random() * 125;
-    var p = platforms.create(10, 400+amount, 'platform');
+    var amount = Math.random() * 90;
+    var p = platforms.create(10, 420+amount, 'platform');
     
     game.physics.enable(p, Phaser.Physics.ARCADE);
     p.body.allowGravity = false;
@@ -369,15 +376,16 @@ function renderObstacle() {
 // abstract class to hold different types of obstacles
 class obstacle {
 	constructor(id) {
-        // var obstacle = obstacles[Math.floor(Math.random()*3)];
-        var obstacle = obstacles[1];
+        var obstacle = obstacles[Math.floor(Math.random()*3)];
+        // var obstacle = obstacles[1];
 		this.id = id;
         var height = 600;
         var allowGravity = true;
         if (!obstacle.onGround) {
-            var heightAdd = Math.random() * 200;
-            height = 300 + heightAdd;
+            // var heightAdd = Math.random() * 200;
+            // height = 300 + heightAdd;
             allowGravity = false;
+            height = player.y;
         }
 		this.obstacle = game.add.sprite(900, height, obstacle.name);
         this.obstacle.frame = obstacle.frame;
@@ -526,7 +534,7 @@ Restart Game
 ******************************************************************/
 
 function render () {
-    var ob = "Obstacles Cleared: "+parseInt(curId, 10).toString();
+    var ob = "Obstacles Cleared: "+parseInt(successfulObs, 10).toString();
     var typ = "Type "+pressString+" To Jump!"
     game.debug.text(ob, 32, 32);
     game.debug.text(typ, 32, 64);
