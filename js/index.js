@@ -86,16 +86,10 @@ function create() {
     renderObstacle();
 
     renderPlatform();
-    //renderText("test");
 
     // define pause button
     menu_button = game.add.button(750, 10, 'button', handleMenu, this, 2, 1, 0);
     menu_button.scale.setTo(.1, .1);
-
-    //platforms
-    
-
-    // cursors = game.input.keyboard.createCursorKeys();
 
     //initialize arrow keys
     spaceKey = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
@@ -111,10 +105,6 @@ function create() {
 
 function update() {
     score += .1;
-    
-    // if (game.time.now < 15) {
-    //     renderPlatform();
-    // }
 
     var shift = 3;
 
@@ -280,26 +270,18 @@ function collisionHandler (obj1, obj2) {
 
     //for now we destroy the obstacle and send another
     removeObstacle(curId);
+    removeText(textId);
     game.time.reset();
     score = 0;
     player.body.x = 150;
     player.body.y = 320;
-    //obstacles = [];
-    //currentObstacles = [];
-    //curId = -1;
     successfulObs = 0;
 
     for (var i = pdelId; i <= platformId; i++) {
         removePlatform(i);
     }
 
-    // currentPlatforms = [];
-    // platformId = -1;
-    // pdelId = 0;
-    // platforms;
-    // platformWaitCounter = 0;
     platformTimer = -1;
-    // curId = 0;
 
     jumpTimer = 0;
     runTimer = 0;
@@ -307,11 +289,6 @@ function collisionHandler (obj1, obj2) {
     pressString = "JUMP";
 
     handleMenu(true,true);
-    //renderObstacle();
-    // curId = 0;
-    // player.x = 150
-    // player.y = 320
-    
 }
 /*****************************************************************
 Platform Code
