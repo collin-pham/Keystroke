@@ -554,6 +554,7 @@ function handleMenu(onStart,restart) {
         if (restart) {
             renderPlatform();
             renderObstacle();
+            pdelId++;
         }
 
         !onStart ? resume_button.destroy() : null;
