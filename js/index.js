@@ -107,6 +107,10 @@ function create() {
 
 function update() {
     
+    // if (game.time.now < 15) {
+    //     renderPlatform();
+    // }
+
     var shift = 3;
 
     //so player doesn't slide around
@@ -269,7 +273,9 @@ function collisionHandler (obj1, obj2) {
 
     //for now we destroy the obstacle and send another
     removeObstacle(curId);
-    renderObstacle();
+    game.time.reset();
+    handleMenu(true,true);
+    //renderObstacle();
     // curId = 0;
     // player.x = 150
     // player.y = 320
@@ -445,8 +451,9 @@ Menu Code
 
 ******************************************************************/
 
-function handleMenu(onStart) {
+function handleMenu(onStart,restart) {
     onStart = typeof onStart == 'boolean' ? true : false;
+    restart = typeof restart == 'boolean' ? true : false;
     var pauseTime = game.time.now;
     // pause the game
     game.paused = !game.paused;
@@ -472,7 +479,7 @@ function handleMenu(onStart) {
     instruction_text = game.add.text(xCord - 150, yCord, text, style);
 
     // Add resume button if not start screan    
-    if (!onStart) {
+    if (!onStart && curId > 0) {
         resume_button = game.add.text(xCord, yCord += yIncrement, 'resume', style);
         resume_button.inputEnabled = true;
         resume_button.events.onInputDown.add(resume, this);
@@ -513,6 +520,12 @@ function handleMenu(onStart) {
 
         start_button.destroy();
         instruction_button.destroy();
+
+        if (restart) {
+            console.log("restart")
+            console.log(restart)
+            renderObstacle();
+        }
 
         !onStart ? resume_button.destroy() : null;
     }
