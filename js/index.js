@@ -293,6 +293,7 @@ function renderPlatform() {
     p.body.immovable = true;
     p.body.velocity.x = changePlatformVelocity()*500 + 50;
     p.body.velocity.y = 0;
+    p.body.checkCollision.down = false;
     currentPlatforms.push(p);
     platformId++;
 }
