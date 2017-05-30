@@ -277,6 +277,31 @@ function collisionHandler (obj1, obj2) {
     //for now we destroy the obstacle and send another
     removeObstacle(curId);
     game.time.reset();
+    score = 0;
+    player.body.x = 150;
+    player.body.y = 320;
+    //obstacles = [];
+    //currentObstacles = [];
+    //curId = -1;
+    successfulObs = 0;
+
+    for (var i = pdelId; i <= platformId; i++) {
+        removePlatform(i);
+    }
+
+    // currentPlatforms = [];
+    // platformId = -1;
+    // pdelId = 0;
+    // platforms;
+    // platformWaitCounter = 0;
+    platformTimer = -1;
+    // curId = 0;
+
+    jumpTimer = 0;
+    runTimer = 0;
+    frameTimer = 0;
+    pressString = "JUMP";
+
     handleMenu(true,true);
     //renderObstacle();
     // curId = 0;
@@ -539,8 +564,7 @@ function handleMenu(onStart,restart) {
         instruction_button.destroy();
 
         if (restart) {
-            console.log("restart")
-            console.log(restart)
+            renderPlatform();
             renderObstacle();
         }
 
