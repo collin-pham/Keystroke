@@ -29,8 +29,7 @@ var score_text;
 var type_text;
 var oldScore_text;
 
-var BASE_TIME = .6;
-var timeDivisor = 1000000;
+var BASE_TIME = 180;
 
 //for movement aside from keyboard input
 var leftKey;
@@ -43,18 +42,14 @@ var pressString = "JUMP";
 
 var obstacles = [];
 var currentObstacles = [];
-var curId = -1;
 var successfulObs = 0;
 
 var currentPlatforms = [];
-var platformId = -1;
-var pdelId = 0;
 var platforms;
 var platformWaitCounter = 0;
 var platformTimer = -1;
 
 var text = [];
-var textId = -1;
 
 var currtext = []
 var grizstyle = { font: "32px Arial", fill: "white", boundsAlignH: "top",boundsAlignV:"top", align: "center", backgroundColor: "transparent" };
@@ -118,15 +113,15 @@ function update() {
     player.body.velocity.x = 0;
 
     //physics handler for collisions
-    game.physics.arcade.collide(player, currentObstacles[curId].obstacle, collisionHandler, null, this);
+    game.physics.arcade.collide(player, currentObstacles[0].obstacle, collisionHandler, null, this);
+
+    for (var i = 0; i < currentPlatforms.length; i++)
+        game.physics.arcade.collide(player, currentPlatforms[i]);
 
     // pause with keyboard
     if (spaceKey.isDown)
         handleMenu()
 
-    // game.physics.arcade.collide(player, platforms);
-    for (var i = pdelId; i <= platformId; i++)
-        game.physics.arcade.collide(player, currentPlatforms[i]);
 
     //is the player trying to jump?
     if (checkstring(pressString) && player.body.newVelocity.y > 0 && player.body.newVelocity.y < 0.362 && (game.time.now > jumpTimer)) {
@@ -143,26 +138,26 @@ function update() {
     } else if (player.body.newVelocity.x == 0 && game.time.now > runTimer) {
         player.frame = 4;
     }
-    if (game.time.now > frameTimer) {
+    if (game.time.now > frameTimer && currentObstacles.length > 0) {
         animate();
     }
 
     //obstacle hitting wall?
-    if (currentObstacles[curId].obstacle.x < 10 ){
+    if (currentObstacles.length > 0 && currentObstacles[0].obstacle.x < 10 ) {
         successfulObs++;
-        removeObstacle(curId);
+        removeObstacle();
         renderObstacle();
-        pressString = randomStr(caculateJumpStringLength());
-        removeText(textId);
+        pressString = randomStr(calculateJumpStringLength());
+        removeText();
         renderText(pressString);
         score += 200;
     } 
-    if (currentObstacles[curId].obstacle.y == 549 ){  
+    if (currentObstacles.length > 0 && currentObstacles[0].obstacle.y == 549 ) {  
         successfulObs++;
-        removeObstacle(curId);
+        removeObstacle();
         renderObstacle();
-        pressString = randomStr(caculateJumpStringLength());
-        removeText(textId);
+        pressString = randomStr(calculateJumpStringLength());
+        removeText();
         renderText(pressString);
         score += 200;
     } 
@@ -170,12 +165,11 @@ function update() {
     //platform hitting wall?
     var random = Math.random()
 
-    if (currentPlatforms[pdelId].x > 800) {
-        removePlatform(pdelId);
-        pdelId++;
+    if (currentPlatforms.length > 0 && currentPlatforms[0].x > 800) {
+        removePlatform();
         platformWaitCounter++;
     }
-    if (platformId + platformWaitCounter - pdelId + 1 < caculateJumpStringLength()) {
+    if (currentPlatforms.length + platformWaitCounter < calculateJumpStringLength()) {
         platformWaitCounter++;
     }
     if (platformWaitCounter > 0 && game.time.now > platformTimer) {
@@ -196,10 +190,8 @@ function update() {
     //makes world look like its moving
     bg.tilePosition.x -= changeBackgroundVelocity(shift);
 
-    if (player.body.x >= 770) {
+    if (player.body.x >= 770)
         player.body.x = 770;
-    }
-
 }
 //add all keys pressed to string
 function key(keycode) {
@@ -271,9 +263,9 @@ function walkBackwards() {
 
 //checks the obstacle to see if it should increment the frame and by how much
 function animate() {
-    if (currentObstacles[curId].shift) {
-        frameTimer = game.time.now + currentObstacles[curId].shiftFreq;
-        currentObstacles[curId].obstacle.frame = currentObstacles[curId].obstacle.frame + 1;
+    if (currentObstacles[0].shift) {
+        frameTimer = game.time.now + currentObstacles[0].shiftFreq;
+        currentObstacles[0].obstacle.frame = currentObstacles[0].obstacle.frame + 1;
     }
     else
         frameTimer += 1000;
@@ -284,25 +276,25 @@ function collisionHandler (obj1, obj2) {
     console.log('BOOM')
 
     //for now we destroy the obstacle and send another
-    removeObstacle(curId);
-    removeText(textId);
-    game.time.reset();
+    removeObstacle();
+    removeText();
     oldScore = score;
     score = 0;
     player.body.x = 150;
     player.body.y = 320;
     successfulObs = 0;
 
-    for (var i = pdelId; i <= platformId; i++) {
-        removePlatform(i);
+    while (currentPlatforms.length > 0) {
+        removePlatform();
     }
-
     platformTimer = -1;
+    platformWaitCounter = 0;
 
     jumpTimer = 0;
     runTimer = 0;
     frameTimer = 0;
     pressString = "JUMP";
+    keystring = "";
 
     handleMenu(true,true);
 }
@@ -329,11 +321,11 @@ function renderPlatform() {
 
     // add platforms
     currentPlatforms.push(p);
-    platformId++;
 }
 //mark an platform for destroy
-function removePlatform(id) {
-    currentPlatforms[id].pendingDestroy = true;
+function removePlatform() {
+    currentPlatforms[0].destroy();
+    currentPlatforms.shift();
 }
 /*****************************************************************
 Text Code
@@ -350,11 +342,12 @@ function renderText(intext) {
     t.body.velocity.x = 50;
     t.body.velocity.y = 0;
     text.push(t);
-    textId++;
 }
-function removeText(id) {
-    if (id >= 0)
-        text[id].pendingDestroy = true;
+function removeText() {
+    if (text.length > 0) {
+        text[0].destroy();
+        text.shift();
+    }
 }
 /*****************************************************************
 Obstacle Code
@@ -425,28 +418,24 @@ function initObstacles() {
 }
 
 //mark an obstacle for destroy
-function removeObstacle(id) {
-    currentObstacles[id].obstacle.pendingDestroy = true;
+function removeObstacle() {
+    currentObstacles[0].obstacle.destroy();
+    currentObstacles.shift();
 }
 
 // render new obstacle objects based on random Id.
 function renderObstacle() {
-    curId++;
-	currentObstacles.push(new obstacle(curId));
+	currentObstacles.push(new obstacle());
 }
 
 // abstract class to hold different types of obstacles
 class obstacle {
-	constructor(id) {
+	constructor() {
         var num = Math.floor(Math.random()*obstacles.length)
         var obstacle = obstacles[num];
-        // var obstacle = obstacles[1];
-		this.id = id;
         var height = 600;
         var allowGravity = true;
         if (!obstacle.onGround) {
-            // var heightAdd = Math.random() * 200;
-            // height = 300 + heightAdd;
             allowGravity = false;
             height = player.y;
         }
@@ -470,9 +459,7 @@ class obstacle {
     	this.obstacle.name = obstacle.name;
         this.shiftFreq = obstacle.shiftFreq;
         this.shift = obstacle.shift;
-        this.yVelocity = obstacle.yVelocity
-
-
+        this.yVelocity = obstacle.yVelocity;
 
     	this.obstacle.body.collideWorldBounds = true;
         this.obstacle.body.allowGravity = allowGravity;
@@ -485,8 +472,7 @@ Difficulty Code
 
 ******************************************************************/
 
-function changeObstacleVelocity(obstacle) {
-    // return calculateRatio()*(obstacle.maxVelocity-obstacle.baseVelocity)+obstacle.baseVelocity;    
+function changeObstacleVelocity(obstacle) { 
     return calculateLinear()*(obstacle.maxVelocity-obstacle.baseVelocity)+obstacle.baseVelocity;
 
 }
@@ -496,12 +482,10 @@ function changeBackgroundVelocity(num) {
 }
 
 function changePlatformVelocity() {
-    // return calculateRatio();    
     return calculateLinear();
 }
 
-function caculateJumpStringLength() {
-    // return Math.floor(calculateRatio()*10);
+function calculateJumpStringLength() {
     var length = 1;
     var val = calculateLinear();
     if (val > .1)
@@ -512,18 +496,17 @@ function caculateJumpStringLength() {
         length++;
     if (val > .85)
         length++;
-    // return Math.floor(calculateLinear()*10) > 0 ? Math.floor(calculateLinear()*10) : 1;
     return length;
 
 }
 
 function calculateRatio() {
-    var ratio = Math.exp(game.time.now/timeDivisor)/Math.exp(BASE_TIME);
+    var ratio = Math.exp(game.time.totalElapsedSeconds()/100)/Math.exp(BASE_TIME/100);
     return ratio;
 }
 
 function calculateLinear() {
-    var ratio = game.time.now/(timeDivisor*BASE_TIME);
+    var ratio = game.time.totalElapsedSeconds()/BASE_TIME;
     return ratio;
 }
 
@@ -564,7 +547,7 @@ function handleMenu(onStart,restart) {
     instruction_text = game.add.text(xCord - 150, yCord, text, style);
 
     // Add resume button if not start screan    
-    if (!onStart && curId > 0) {
+    if (!onStart && currentObstacles.length > 0) {
         resume_button = game.add.text(xCord, yCord += yIncrement, 'resume', style);
         resume_button.inputEnabled = true;
         resume_button.events.onInputDown.add(resume, this);
@@ -589,6 +572,7 @@ function handleMenu(onStart,restart) {
     function start () {
         unpause();
         menu_button.visible = true;
+        game.time.reset();
     }
 
     function resume() {
@@ -608,9 +592,8 @@ function handleMenu(onStart,restart) {
 
         if (restart) {
             oldScore_text.destroy();
-            renderPlatform();
             renderObstacle();
-            pdelId++;
+            game.time.reset();
         }
 
         !onStart ? resume_button.destroy() : null;
