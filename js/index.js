@@ -155,21 +155,21 @@ function update() {
 
 
     //is the player trying to jump?
-    if (checkstring(pressString) && player.body.newVelocity.y > 0 && player.body.newVelocity.y < 0.362 && (game.time.now > jumpTimer)) {
+    if (checkstring(pressString) && player.body.newVelocity.y > 0 && player.body.newVelocity.y < 0.362 && (game.time.totalElapsedSeconds() > jumpTimer)) {
         playerJump();
     }
 
     //walking animation
-    if (player.body.newVelocity.x > 0 && game.time.now > runTimer) {
+    if (player.body.newVelocity.x > 0 && game.time.totalElapsedSeconds() > runTimer) {
         walkForwards()
         
-    }else if (player.body.newVelocity.x < 0 && game.time.now > runTimer) {
+    }else if (player.body.newVelocity.x < 0 && game.time.totalElapsedSeconds() > runTimer) {
         walkBackwards()
         
-    } else if (player.body.newVelocity.x == 0 && game.time.now > runTimer) {
+    } else if (player.body.newVelocity.x == 0 && game.time.totalElapsedSeconds() > runTimer) {
         player.frame = 4;
     }
-    if (game.time.now > frameTimer && currentObstacles.length > 0) {
+    if (currentObstacles.length > 0 && currentObstacles[0].shift && game.time.totalElapsedSeconds() > frameTimer) {
         animate();
     }
 
@@ -193,9 +193,7 @@ function update() {
         score += 200;
     } 
 
-    //platform hitting wall?
-    var random = Math.random()
-
+    //platform hitting wall? 
     if (currentPlatforms.length > 0 && currentPlatforms[0].x > 800) {
         removePlatform();
         platformWaitCounter++;
@@ -203,9 +201,9 @@ function update() {
     if (currentPlatforms.length + platformWaitCounter < calculateJumpStringLength()) {
         platformWaitCounter++;
     }
-    if (platformWaitCounter > 0 && game.time.now > platformTimer) {
+    if (platformWaitCounter > 0 && game.time.totalElapsedSeconds() > platformTimer) {
         platformWaitCounter--;
-        platformTimer = game.time.now + 1700;
+        platformTimer = game.time.totalElapsedSeconds() + 1.5;
         renderPlatform();
     }
 
@@ -315,12 +313,12 @@ function initKeyDistances() {
 function playerJump() {
     player.frame = 6;
     player.body.velocity.y = -750;
-    jumpTimer = game.time.now + 750;
+    jumpTimer = game.time.totalElapsedSeconds() + .5;
 }
 
 
 function walkForwards() {
-    runTimer = game.time.now + 250;
+    runTimer = game.time.totalElapsedSeconds() + .15;
     if (player.body.velocity.y == 0)
         player.frame = player.frame % 4 + 5;
     else 
@@ -328,7 +326,7 @@ function walkForwards() {
     
 }
 function walkBackwards() {
-    runTimer = game.time.now + 250;
+    runTimer = game.time.totalElapsedSeconds() + .15;
     if (player.body.velocity.y == 0)
         player.frame = (player.frame + 1) % 4;
     else 
@@ -337,12 +335,8 @@ function walkBackwards() {
 
 //checks the obstacle to see if it should increment the frame and by how much
 function animate() {
-    if (currentObstacles[0].shift) {
-        frameTimer = game.time.now + currentObstacles[0].shiftFreq;
-        currentObstacles[0].obstacle.frame = currentObstacles[0].obstacle.frame + 1;
-    }
-    else
-        frameTimer += 1000;
+    frameTimer = game.time.totalElapsedSeconds() + currentObstacles[0].shiftFreq;
+    currentObstacles[0].obstacle.frame = currentObstacles[0].obstacle.frame + 1;
 }
 
 function collisionHandler (obj1, obj2) {
@@ -358,11 +352,10 @@ function collisionHandler (obj1, obj2) {
     player.body.y = 320;
     successfulObs = 0;
 
-    while (currentPlatforms.length > 0) {
+    while (currentPlatforms.length > 0)
         removePlatform();
-    }
-    platformTimer = -1;
     platformWaitCounter = 0;
+    game.time.reset();
 
     jumpTimer = 0;
     runTimer = 0;
@@ -438,7 +431,7 @@ function initObstacles() {
         name: 'mushroom',
         width: 50,
         onGround: true,
-        shiftFreq: 50,
+        shiftFreq: 0,
         shift: false,
         yVelocity: false
     }
@@ -451,7 +444,7 @@ function initObstacles() {
         name: 'fireball',
         width: 100,
         onGround: false,
-        shiftFreq: 50,
+        shiftFreq: 0,
         shift: false,
         yVelocity: false
     }
@@ -464,7 +457,7 @@ function initObstacles() {
         name: 'crab',
         width: 80,
         onGround: true,
-        shiftFreq: 50,
+        shiftFreq: .03,
         shift: true,
         yVelocity: false
     }
@@ -477,7 +470,7 @@ function initObstacles() {
         name: 'raindrop',
         width: 51,
         onGround: false,
-        shiftFreq: 50,
+        shiftFreq: 0,
         shift: false,
         yVelocity: true
     }
@@ -505,7 +498,7 @@ function renderObstacle() {
 // abstract class to hold different types of obstacles
 class obstacle {
 	constructor() {
-        var num = Math.floor(Math.random()*obstacles.length)
+        var num = Math.floor(Math.random()*obstacles.length);
         var obstacle = obstacles[num];
         var height = 600;
         var allowGravity = true;
@@ -528,7 +521,7 @@ class obstacle {
         this.obstacle.width = obstacle.width;
         this.obstacle.height = obstacle.height;
     	this.obstacle.name = obstacle.name;
-        
+
         this.shiftFreq = obstacle.shiftFreq;
         this.shift = obstacle.shift;
         this.yVelocity = obstacle.yVelocity;
@@ -590,7 +583,6 @@ Menu Code
 function handleMenu(onStart,restart) {
     onStart = typeof onStart == 'boolean' ? true : false;
     restart = typeof restart == 'boolean' ? true : false;
-    var pauseTime = game.time.now;
     // pause the game
     game.paused = !game.paused;
     menu_button.visible = false;
@@ -642,9 +634,9 @@ function handleMenu(onStart,restart) {
     back_button.events.onInputDown.add(toggleButtons, this);
 
     function start () {
+        game.time.reset();
         unpause();
         menu_button.visible = true;
-        game.time.reset();
     }
 
     function resume() {
@@ -664,8 +656,9 @@ function handleMenu(onStart,restart) {
 
         if (restart) {
             oldScore_text.destroy();
-            renderObstacle();
             game.time.reset();
+            renderObstacle();
+            platformTimer = -1;
         }
 
         !onStart ? resume_button.destroy() : null;
