@@ -29,6 +29,36 @@ var score_text;
 var type_text;
 var oldScore_text;
 
+var keyDistances = {}
+var keyBoard = {
+    A : ["Q","W","S","Z"],
+    B : ["V","G","H","N"],
+    C : ["X","D","F","V"],
+    D : ["S","E","R","F","C","X"],
+    E : ["W","S","D","R"],
+    F : ["R","T","G","V","C","D"],
+    G : ["H","Y","T","F","V","B"],
+    H : ["G","Y","U","J","N","B"],
+    I : ["U","J","K","O"],
+    J : ["H","U","I","K","M","N"],
+    K : ["J","I","O","L","M"],
+    L : ["K","O","P"],
+    M : ["N","J","K"],
+    N : ["B","H","J","M"],
+    O : ["I","K","L","P"],
+    P : ["O","L"],
+    Q : ["A","W"],
+    R : ["E","D","F","T"],
+    S : ["A","W","E","D","X","Z"],
+    T : ["R","F","G","Y"],
+    U : ["Y","H","J","I"],
+    V : ["C","F","G","B"],
+    W : ["Q","A","S","E"],
+    X : ["Z","S","D","C"],
+    Y : ["T","G","H","U"],
+    Z : ["A","S","X"]
+}
+
 var BASE_TIME = 180;
 
 //for movement aside from keyboard input
@@ -64,6 +94,7 @@ var score = 0;
 
 function create() {
     // Define the world
+    initKeyDistances();
     game.physics.startSystem(Phaser.Physics.ARCADE);
     game.world.setBounds(0, 0, 1000, 600);
     game.physics.arcade.gravity.y = 300;
@@ -231,12 +262,55 @@ function randomStr(siz = 4) {
     var char;
     while (str.length < siz) {
         char = String.fromCharCode(Math.floor(Math.random() * 26) + 65);
-        if (!str.includes(char))
+        if (!str.includes(char) && checkKeyDistance(str,char) < calculateJumpStringLength())
             str += char;
     }
     return str;
 }
 
+function checkKeyDistance(string, char) {
+    distance = 0;
+    for (var i = 0; i < string.length; i++) {
+        var checkChar = string.charAt(i);
+        var tempDistance = keyDistances[checkChar][char];
+        if (tempDistance > distance)
+            distance = tempDistance;
+    }
+    return distance;
+}
+
+function initKeyDistances() {
+    for (var letter in keyBoard) {
+        visited = [];
+        letterQueue = [];
+        keyDistances[letter] = {};
+        keyDistances[letter][letter] = 0;
+        distance = 1;
+        for (var i = 0; i < keyBoard[letter].length; i++) {
+            letterQueue.push(keyBoard[letter][i]);
+        }
+        visited.push(letter)
+        while (letterQueue.length > 0) {
+            var toadd = []
+            while(letterQueue.length > 0) {
+                var neighbor = letterQueue[0];
+                keyDistances[letter][neighbor] = distance;
+                visited.push(neighbor);
+                toadd.push(neighbor);
+                letterQueue.shift();
+            }
+            distance++;
+            for (var j = 0; j < toadd.length; j++) {
+                var char = toadd[j];
+                for (var i = 0; i < keyBoard[char].length; i++) {
+                    var deeperchar = keyBoard[char][i];
+                    if (!visited.includes(deeperchar))
+                        letterQueue.push(deeperchar)
+                }
+            }
+        }
+    }
+}
 //make the player jump
 function playerJump() {
     player.frame = 6;
