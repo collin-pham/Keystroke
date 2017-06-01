@@ -29,7 +29,7 @@ var score_text;
 var type_text;
 var oldScore_text;
 
-var keyDistances = {}
+var keyDistances = {};
 var keyBoard = {
     A : ["Q","W","S","Z"],
     B : ["V","G","H","N"],
@@ -57,7 +57,7 @@ var keyBoard = {
     X : ["Z","S","D","C"],
     Y : ["T","G","H","U"],
     Z : ["A","S","X"]
-}
+};
 
 var BASE_TIME = 180;
 
@@ -81,7 +81,7 @@ var platformTimer = -1;
 
 var text = [];
 
-var currtext = []
+var currtext = [];
 var grizstyle = { font: "32px Arial", fill: "white", boundsAlignH: "top",boundsAlignV:"top", align: "center", backgroundColor: "transparent" };
 var danstyle = { font: "24px Arial", fill: "#ffffff", align: "left", boundsAlignH: "top", boundsAlignV:"top" };
 
@@ -511,12 +511,10 @@ class obstacle {
         var allowGravity = true;
         if (!obstacle.onGround) {
             allowGravity = false;
-            height = player.y;
+            height = player.body.y;
         }
-		
-        
         if (obstacle.yVelocity) {
-            this.obstacle = game.add.sprite(750*Math.random(), 0, obstacle.name);
+            this.obstacle = game.add.sprite(player.body.x, 0, obstacle.name);
             game.physics.enable(this.obstacle, Phaser.Physics.ARCADE);
             this.obstacle.body.velocity.y = .66 * changeObstacleVelocity(obstacle);
             this.obstacle.body.acceleration.y = 100;
@@ -525,12 +523,12 @@ class obstacle {
             this.obstacle = game.add.sprite(900, height, obstacle.name);
             game.physics.enable(this.obstacle, Phaser.Physics.ARCADE);
             this.obstacle.body.velocity.x = -.66 * changeObstacleVelocity(obstacle);
-           
         }
         this.obstacle.frame = obstacle.frame;
         this.obstacle.width = obstacle.width;
         this.obstacle.height = obstacle.height;
     	this.obstacle.name = obstacle.name;
+        
         this.shiftFreq = obstacle.shiftFreq;
         this.shift = obstacle.shift;
         this.yVelocity = obstacle.yVelocity;
