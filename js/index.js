@@ -23,6 +23,11 @@ var jumpTimer = 0;
 var runTimer = 0;
 var frameTimer = 0;
 var cursors;
+var oldScore;
+
+var score_text;
+var type_text;
+var oldScore_text;
 
 var BASE_TIME = .6;
 var timeDivisor = 1000000;
@@ -53,6 +58,7 @@ var textId = -1;
 
 var currtext = []
 var grizstyle = { font: "32px Arial", fill: "white", boundsAlignH: "top",boundsAlignV:"top", align: "center", backgroundColor: "transparent" };
+var danstyle = { font: "24px Arial", fill: "#ffffff", align: "left", boundsAlignH: "top", boundsAlignV:"top" };
 
 
 //string of all keys pressed, dont touch or rename collin!!
@@ -281,6 +287,7 @@ function collisionHandler (obj1, obj2) {
     removeObstacle(curId);
     removeText(textId);
     game.time.reset();
+    oldScore = score;
     score = 0;
     player.body.x = 150;
     player.body.y = 320;
@@ -549,7 +556,11 @@ function handleMenu(onStart,restart) {
     var yIncrement = 50;
 
     // Add start button and instruction text
-    start_button = game.add.text(xCord, yCord, onStart ? 'start' : 'restart', style);
+    if (restart) {
+        var sc = "Score: "+parseInt(oldScore).toString();
+        oldScore_text = game.add.text(xCord, yCord - 50, sc, danstyle);
+    }
+    start_button = game.add.text(xCord, yCord, restart ? 'restart' : 'start', style);
     instruction_text = game.add.text(xCord - 150, yCord, text, style);
 
     // Add resume button if not start screan    
@@ -596,6 +607,7 @@ function handleMenu(onStart,restart) {
         instruction_button.destroy();
 
         if (restart) {
+            oldScore_text.destroy();
             renderPlatform();
             renderObstacle();
             pdelId++;
@@ -621,10 +633,14 @@ Restart Game
 ******************************************************************/
 
 function render () {
-    var sc = "Score Earned: "+parseInt(score).toString();
-    var ob = "Obstacles Cleared: "+parseInt(successfulObs, 10).toString();
-    var typ = "Type "+pressString+" To Jump!"
-    game.debug.text(sc, 32, 32);
-    game.debug.text(ob, 32, 64);
-    game.debug.text(typ, 32, 96);
+    var sc = "Score: "+parseInt(score).toString();
+    // var ob = "Obstacles Cleared: "+parseInt(successfulObs, 10).toString();
+    var typ = "Type "+pressString+"!"
+    if (score_text != null) {
+        score_text.destroy();
+        type_text.destroy();
+    }
+    score_text = game.add.text(32, 32, sc, danstyle);
+    // obstacle_text = game.add.text(32, 64, ob, danstyle);
+    type_text = game.add.text(32, 64, typ, danstyle);
 }
