@@ -94,6 +94,7 @@ var text = [];
 var currtext = [];
 var grizstyle = { font: "32px Arial", fill: "white", boundsAlignH: "top",boundsAlignV:"top", align: "center", backgroundColor: "transparent" };
 var danstyle = { font: "24px Arial", fill: "#ffffff", align: "left", boundsAlignH: "top", boundsAlignV:"top" };
+var jumpstyle = { font: "24px Arial", fill: "#1c59f7", align: "left", boundsAlignH: "top", boundsAlignV:"top" };
 
 
 //string of all keys pressed, dont touch or rename collin!!
@@ -139,7 +140,7 @@ function create() {
     jump = game.add.audio("jump");
     collision = game.add.audio("collision");
     bgmusic = game.add.audio("bgmusic");
-
+    renderText("J");
     bgmusic.play();
 
     // game.sound.setDecodedCallback([collision], collisionHandler, this);
@@ -397,7 +398,7 @@ Player Code
 
 ******************************************************************/
 function setPlayer() {
-    player = game.add.sprite(150, 320, 'dude');
+    player = game.add.sprite(150, 600, 'dude');
     player.frame = 1;
 
     game.physics.enable(player, Phaser.Physics.ARCADE);
@@ -741,7 +742,7 @@ Restart Game
 function render () {
     var sc = "Score: "+parseInt(score).toString();
     // var ob = "Obstacles Cleared: "+parseInt(successfulObs, 10).toString();
-    var typ = "Type "+pressString
+    var typ = "Type " + pressString + " to jump"
     var hs = "High Score: "+parseInt(high_score).toString();
     if (score_text != null) {
         score_text.destroy();
@@ -751,5 +752,5 @@ function render () {
     hs_text = game.add.text(32, 32, hs, danstyle);
     score_text = game.add.text(32, 64, sc, danstyle);
     // obstacle_text = game.add.text(32, 64, ob, danstyle);
-    type_text = game.add.text(32, 96, typ, danstyle);
+    type_text = game.add.text(32, 96, typ, jumpstyle);
 }
