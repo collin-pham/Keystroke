@@ -8,11 +8,12 @@ function preload() {
 
     game.load.spritesheet('button', 'assets/pause.png', 321, 311);
 
-    game.load.spritesheet('platform', 'assets/LargePlatform.png', 130, 50);
+    game.load.spritesheet('platform', 'assets/platform.png', 125, 50);
 
     game.load.spritesheet('fireball', 'assets/fireball.png', 52, 42);
     game.load.spritesheet('crab', 'assets/crab.png', 131, 129);
     game.load.spritesheet('raindrop', 'assets/raindrop.png', 290, 399);
+    game.load.spritesheet('asteroid', 'assets/asteroid.png', 300, 369);
     game.load.spritesheet('mushroom', 'assets/mushroom.png');
 
 }
@@ -467,7 +468,7 @@ function initObstacles() {
         frame: 0,
         height: 51,
         maxVelocity: 1000,
-        name: 'raindrop',
+        name: 'asteroid',
         width: 51,
         onGround: false,
         shiftFreq: 0,
@@ -683,7 +684,7 @@ Restart Game
 function render () {
     var sc = "Score: "+parseInt(score).toString();
     // var ob = "Obstacles Cleared: "+parseInt(successfulObs, 10).toString();
-    var typ = "Type "+pressString+"!"
+    var typ = "Type "+pressString
     if (score_text != null) {
         score_text.destroy();
         type_text.destroy();
