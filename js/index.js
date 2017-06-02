@@ -106,15 +106,7 @@ function create() {
     bg = game.add.tileSprite(0, 0, 800, 600, 'background');
 
     // Define player
-    player = game.add.sprite(150, 320, 'dude');
-    player.frame = 5;
-
-    game.physics.enable(player, Phaser.Physics.ARCADE);
-
-    player.body.collideWorldBounds = true;
-    player.body.gravity.y = 1000;
-    player.body.maxVelocity.y = 1000;
-    player.body.setSize(20, 32, 5, 16);
+    setPlayer();
 
     // Define obstacle
     initObstacles()
@@ -139,7 +131,7 @@ function create() {
 }
 
 function update() {
-    score += .1;
+    score += calculateRatio();
 
     var shift = 3;
 
@@ -147,7 +139,7 @@ function update() {
     player.body.velocity.x = 0;
 
     //physics handler for collisions
-    game.physics.arcade.collide(player, currentObstacles[0].obstacle, collisionHandler, null, this);
+    currentObstacles.length > 0 ? game.physics.arcade.collide(player, currentObstacles[0].obstacle, collisionHandler, null, this) : null;
 
     for (var i = 0; i < currentPlatforms.length; i++)
         game.physics.arcade.collide(player, currentPlatforms[i]);
@@ -343,19 +335,21 @@ function animate() {
 }
 
 function collisionHandler (obj1, obj2) {
-    game.stage.backgroundColor = 'red';
-    console.log('BOOM')
+    console.log('BOOM');
+    reset();
+    handleMenu(true,true);
+}
 
-    //for now we destroy the obstacle and send another
+function reset() {
     removeObstacle();
     removeText();
     oldScore = score;
     if (score > high_score)
         high_score = score;
     score = 0;
-    player.body.x = 150;
-    player.body.y = 320;
     successfulObs = 0;
+    player.destroy();
+    setPlayer();
 
     while (currentPlatforms.length > 0)
         removePlatform();
@@ -367,9 +361,24 @@ function collisionHandler (obj1, obj2) {
     frameTimer = 0;
     pressString = "J";
     keystring = "";
-
-    handleMenu(true,true);
 }
+
+/*****************************************************************
+Player Code
+
+******************************************************************/
+function setPlayer() {
+    player = game.add.sprite(150, 320, 'dude');
+    player.frame = 5;
+
+    game.physics.enable(player, Phaser.Physics.ARCADE);
+
+    player.body.collideWorldBounds = true;
+    player.body.gravity.y = 1000;
+    player.body.maxVelocity.y = 1000;
+    player.body.setSize(20, 32, 5, 16);
+}
+
 /*****************************************************************
 Platform Code
 
@@ -491,14 +500,15 @@ function initObstacles() {
 
 //mark an obstacle for destroy
 function removeObstacle() {
-    currentObstacles[0].obstacle.destroy();
-    currentObstacles.shift();
+    if (currentObstacles.length > 0) {
+        currentObstacles[0].obstacle.destroy();
+        currentObstacles.shift();
+    }
 }
 
 // render new obstacle objects based on random Id.
 function renderObstacle() {
 	currentObstacles.push(new obstacle());
-    console.log(currentObstacles[0])
 }
 
 // abstract class to hold different types of obstacles
@@ -549,7 +559,7 @@ function changeObstacleVelocity(obstacle) {
 }
 
 function changeBackgroundVelocity(num) {
-    return calculateRatio()*num;
+    return calculateLinear()*num;
 }
 
 function changePlatformVelocity() {
@@ -607,13 +617,14 @@ function handleMenu(onStart,restart) {
     var xCord = 350;
     var yCord = 200;
     var yIncrement = 50;
+    var pauseRestart = false;
 
     // Add start button and instruction text
     if (restart) {
         var sc = "Score: "+parseInt(oldScore).toString();
         oldScore_text = game.add.text(xCord, yCord - 50, sc, danstyle);
     }
-    start_button = game.add.text(xCord, yCord, restart ? 'restart' : 'start', style);
+    start_button = game.add.text(xCord, yCord, restart || !onStart ? 'restart' : 'start', style);
     instruction_text = game.add.text(xCord - 150, yCord, text, style);
 
     // Add resume button if not start screan    
@@ -640,7 +651,12 @@ function handleMenu(onStart,restart) {
     back_button.events.onInputDown.add(toggleButtons, this);
 
     function start () {
-        game.time.reset();
+        if (!onStart) {
+            pauseRestart = true;
+            reset();
+            player.destroy();
+            setPlayer();
+        }
         unpause();
         menu_button.visible = true;
     }
@@ -662,6 +678,8 @@ function handleMenu(onStart,restart) {
 
         if (restart) {
             oldScore_text.destroy();
+        }
+        if (pauseRestart || restart) {
             game.time.reset();
             renderObstacle();
             platformTimer = -1;
@@ -674,6 +692,7 @@ function handleMenu(onStart,restart) {
         instruction_button.visible = !instruction_button.visible;
         back_button.visible = !back_button.visible;
         instruction_text.visible = !instruction_text.visible;
+        oldScore_text.visible = !oldScore_text.visible;
 
         !onStart ? resume_button.visible = !resume_button.visible : null;
     }
