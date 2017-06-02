@@ -3,7 +3,7 @@ var game = new Phaser.Game(800, 600, Phaser.CANVAS, 'Keystroke', { preload: prel
 
 // Load the assets
 function preload() {
-    game.load.spritesheet('dude', 'assets/dude.png', 32, 48);
+    game.load.spritesheet('dude', 'assets/spacedude.png', 48, 48);
     game.load.image('background', 'assets/background.png');
 
     game.load.spritesheet('button', 'assets/pause.png', 321, 311);
@@ -12,7 +12,6 @@ function preload() {
 
     game.load.spritesheet('fireball', 'assets/fireball2.png', 54, 19);
     game.load.spritesheet('crab', 'assets/crab.png', 131, 129);
-    game.load.spritesheet('raindrop', 'assets/raindrop.png', 290, 399);
     game.load.spritesheet('asteroid', 'assets/asteroid.png', 300, 369);
     game.load.spritesheet('mushroom', 'assets/mushroom2.png');
 
@@ -22,6 +21,8 @@ var player;
 var facing = 'idle';
 var jumpTimer = 0;
 var runTimer = 0;
+var spinTimer = 0;
+
 var frameTimer = 0;
 var cursors;
 var oldScore;
@@ -161,9 +162,15 @@ function update() {
     }else if (player.body.newVelocity.x < 0 && game.time.totalElapsedSeconds() > runTimer) {
         walkBackwards()
         
-    } else if (player.body.newVelocity.x == 0 && game.time.totalElapsedSeconds() > runTimer) {
-        player.frame = 4;
+    } else if (player.body.newVelocity.x == 0 && game.time.totalElapsedSeconds() > runTimer && jumpTimer < game.time.totalElapsedSeconds()) {
+        player.frame = 1;
     }
+    if (player.body.newVelocity.x == 0 && jumpTimer > game.time.totalElapsedSeconds() && spinTimer < game.time.totalElapsedSeconds()){
+        spin();
+        spinTimer = game.time.totalElapsedSeconds() + .07;
+    }
+
+
     if (currentObstacles.length > 0 && currentObstacles[0].shift && game.time.totalElapsedSeconds() > frameTimer) {
         animate();
     }
@@ -306,26 +313,34 @@ function initKeyDistances() {
 }
 //make the player jump
 function playerJump() {
-    player.frame = 6;
     player.body.velocity.y = -750;
     jumpTimer = game.time.totalElapsedSeconds() + 1;
+
 }
 
 
 function walkForwards() {
     runTimer = game.time.totalElapsedSeconds() + .15;
+    player.frame = player.frame < 6 ? 6 : player.frame;
+
     if (player.body.velocity.y == 0)
-        player.frame = player.frame % 4 + 5;
+        player.frame = ++player.frame > 8 ? 6 : player.frame; 
     else 
-        player.frame = 6;
+        player.frame = 8;
     
 }
 function walkBackwards() {
     runTimer = game.time.totalElapsedSeconds() + .15;
+    player.frame = player.frame < 3 ? 3 : player.frame;
     if (player.body.velocity.y == 0)
-        player.frame = (player.frame + 1) % 4;
+        player.frame = ++player.frame > 5 ? 3 : player.frame;
     else 
-        player.frame = 1;
+        player.frame = 5;
+}
+
+function spin() {
+    player.frame += 3;
+    player.frame = player.frame > 10 ? 1 : player.frame;
 }
 
 //checks the obstacle to see if it should increment the frame and by how much
@@ -369,7 +384,7 @@ Player Code
 ******************************************************************/
 function setPlayer() {
     player = game.add.sprite(150, 320, 'dude');
-    player.frame = 5;
+    player.frame = 1;
 
     game.physics.enable(player, Phaser.Physics.ARCADE);
 
