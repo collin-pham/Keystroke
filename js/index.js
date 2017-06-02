@@ -10,11 +10,11 @@ function preload() {
 
     game.load.spritesheet('platform', 'assets/platform.png', 125, 50);
 
-    game.load.spritesheet('fireball', 'assets/fireball.png', 54, 19);
+    game.load.spritesheet('fireball', 'assets/fireball2.png', 54, 19);
     game.load.spritesheet('crab', 'assets/crab.png', 131, 129);
     game.load.spritesheet('raindrop', 'assets/raindrop.png', 290, 399);
     game.load.spritesheet('asteroid', 'assets/asteroid.png', 300, 369);
-    game.load.spritesheet('mushroom', 'assets/mushroom.png');
+    game.load.spritesheet('mushroom', 'assets/mushroom2.png');
 
 }
 // define initial parameters
@@ -62,7 +62,7 @@ var keyBoard = {
     Z : ["A","S","X"]
 };
 
-var BASE_TIME = 180;
+var BASE_TIME = 240;
 
 //for movement aside from keyboard input
 var leftKey;
@@ -71,7 +71,7 @@ var rightKey;
 var bg;                         // background variable
 
 //stores the command that corresponds to jump at any given time
-var pressString = "JUMP";
+var pressString = "J";
 
 var obstacles = [];
 var currentObstacles = [];
@@ -316,7 +316,7 @@ function initKeyDistances() {
 function playerJump() {
     player.frame = 6;
     player.body.velocity.y = -750;
-    jumpTimer = game.time.totalElapsedSeconds() + .5;
+    jumpTimer = game.time.totalElapsedSeconds() + 1;
 }
 
 
@@ -365,7 +365,7 @@ function collisionHandler (obj1, obj2) {
     jumpTimer = 0;
     runTimer = 0;
     frameTimer = 0;
-    pressString = "JUMP";
+    pressString = "J";
     keystring = "";
 
     handleMenu(true,true);
@@ -444,10 +444,10 @@ function initObstacles() {
         action: 'jump',
         baseVelocity: 100,
         frame: 0,
-        height: 100,
+        height: 19,
         maxVelocity: 1000,
         name: 'fireball',
-        width: 100,
+        width: 54,
         onGround: false,
         shiftFreq: 0,
         shift: false,
@@ -498,6 +498,7 @@ function removeObstacle() {
 // render new obstacle objects based on random Id.
 function renderObstacle() {
 	currentObstacles.push(new obstacle());
+    console.log(currentObstacles[0])
 }
 
 // abstract class to hold different types of obstacles
@@ -688,7 +689,7 @@ Restart Game
 function render () {
     var sc = "Score: "+parseInt(score).toString();
     // var ob = "Obstacles Cleared: "+parseInt(successfulObs, 10).toString();
-    var typ = "Type "+pressString+"!"
+    var typ = "Type "+pressString
     var hs = "High Score: "+parseInt(high_score).toString();
     if (score_text != null) {
         score_text.destroy();
