@@ -14,9 +14,15 @@ function preload() {
     game.load.spritesheet('crab', 'assets/crab.png', 131, 129);
     game.load.spritesheet('asteroid', 'assets/asteroid.png', 300, 369);
     game.load.spritesheet('mushroom', 'assets/mushroom2.png');
-
+    game.load.audio('jump',['assets/jump.wav']);
+    game.load.audio('collision',['assets/DCCollision.mp3']);
+    game.load.audio('bgmusic',['assets/bgmusic.mp3']);
 }
 // define initial parameters
+var jump;
+var collision;
+var bgmusic;
+
 var player;
 var facing = 'idle';
 var jumpTimer = 0;
@@ -129,6 +135,14 @@ function create() {
 
     // Pass true to show the starting menu
     handleMenu(true);
+
+    jump = game.add.audio("jump");
+    collision = game.add.audio("collision");
+    bgmusic = game.add.audio("bgmusic");
+
+    bgmusic.play();
+
+    // game.sound.setDecodedCallback([collision], collisionHandler, this);
 }
 
 function update() {
@@ -313,6 +327,7 @@ function initKeyDistances() {
 }
 //make the player jump
 function playerJump() {
+    jump.play();
     player.body.velocity.y = -750;
     jumpTimer = game.time.totalElapsedSeconds() + 1;
 
@@ -350,7 +365,6 @@ function animate() {
 }
 
 function collisionHandler (obj1, obj2) {
-    console.log('BOOM');
     reset();
     handleMenu(true,true);
 }
@@ -370,7 +384,6 @@ function reset() {
         removePlatform();
     platformWaitCounter = 0;
     game.time.reset();
-
     jumpTimer = 0;
     runTimer = 0;
     frameTimer = 0;
