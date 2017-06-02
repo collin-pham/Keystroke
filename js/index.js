@@ -25,10 +25,12 @@ var runTimer = 0;
 var frameTimer = 0;
 var cursors;
 var oldScore;
+var high_score = 0;
 
 var score_text;
 var type_text;
 var oldScore_text;
+var hs_text;
 
 var keyDistances = {};
 var keyBoard = {
@@ -348,6 +350,8 @@ function collisionHandler (obj1, obj2) {
     removeObstacle();
     removeText();
     oldScore = score;
+    if (score > high_score)
+        high_score = score;
     score = 0;
     player.body.x = 150;
     player.body.y = 320;
@@ -684,12 +688,15 @@ Restart Game
 function render () {
     var sc = "Score: "+parseInt(score).toString();
     // var ob = "Obstacles Cleared: "+parseInt(successfulObs, 10).toString();
-    var typ = "Type "+pressString
+    var typ = "Type "+pressString+"!"
+    var hs = "High Score: "+parseInt(high_score).toString();
     if (score_text != null) {
         score_text.destroy();
         type_text.destroy();
+        hs_text.destroy();
     }
-    score_text = game.add.text(32, 32, sc, danstyle);
+    hs_text = game.add.text(32, 32, hs, danstyle);
+    score_text = game.add.text(32, 64, sc, danstyle);
     // obstacle_text = game.add.text(32, 64, ob, danstyle);
-    type_text = game.add.text(32, 64, typ, danstyle);
+    type_text = game.add.text(32, 96, typ, danstyle);
 }
