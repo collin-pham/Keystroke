@@ -543,6 +543,10 @@ class obstacle {
             game.physics.enable(this.obstacle, Phaser.Physics.ARCADE);
             this.obstacle.body.velocity.y = .66 * changeObstacleVelocity(obstacle);
             this.obstacle.body.acceleration.y = 100;
+            if (this.obstacle.body.x > 400)
+                this.obstacle.body.velocity.x = -Math.random()*140 - 30;
+            else
+                this.obstacle.body.velocity.x = Math.random()*140 + 30;
 
         } else {
             this.obstacle = game.add.sprite(900, height, obstacle.name);
