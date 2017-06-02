@@ -374,6 +374,7 @@ function reset() {
     jumpTimer = 0;
     runTimer = 0;
     frameTimer = 0;
+    spinTimer = 0;
     pressString = "J";
     keystring = "";
 }
