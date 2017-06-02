@@ -1,0 +1,15 @@
+@charset "UTF-8";
+/* CSS Document */
+
+#Keystroke {
+	width: 800px;
+	margin-left: auto;
+	margin-right: auto;
+}
+#floor {
+	width: 800px;
+	height: 10px;
+	background-color:#742D00;
+	margin-left: auto;
+	margin-right: auto;
+}
