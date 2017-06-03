@@ -716,6 +716,7 @@ function handleMenu(onStart,restart) {
         if (pauseRestart || restart) {
             game.time.reset();
             renderObstacle();
+            renderText(pressString);
             platformTimer = -1;
         }
 
